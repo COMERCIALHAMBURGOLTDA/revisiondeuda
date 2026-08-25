@@ -36,7 +36,7 @@
     background:var(--bg);
     color:var(--ink);
     font-family:var(--font-ui);
-    font-size:14px;
+    font-size:15px;
     padding:0;
     min-height:100vh;
   }
@@ -74,7 +74,7 @@
   .topbar{
     background:var(--card);
     border-bottom:1px solid var(--border);
-    padding:14px 28px;
+    padding:14px 14px;
     display:flex;
     justify-content:space-between;
     align-items:center;
@@ -82,12 +82,12 @@
     gap:12px;
   }
   .topbar h1{
-    font-size:20px;
+    font-size:22px;
     font-weight:600;
     color:var(--ink);
   }
   .topbar .subtitle{
-    font-size:12px;
+    font-size:13px;
     color:var(--ink-faint);
     margin-top:2px;
   }
@@ -104,9 +104,9 @@
     border:1px solid var(--border-strong);
     color:var(--ink-dim);
     font-family:var(--font-ui);
-    font-size:12.5px;
+    font-size:13.5px;
     font-weight:600;
-    padding:7px 14px;
+    padding:8px 15px;
     border-radius:3px;
     cursor:pointer;
     transition:all .12s ease;
@@ -119,7 +119,7 @@
   .chip-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
   .chip{
     font-family:var(--font-ui);
-    font-size:12px;
+    font-size:13px;
     font-weight:600;
     padding:6px 14px;
     border-radius:14px;
@@ -160,7 +160,7 @@
   .filter-strip{
     background:#eef6ff;
     border-bottom:1px solid #d0e7ff;
-    padding:8px 28px;
+    padding:8px 14px;
     display:none;
     align-items:center;
     gap:8px;
@@ -185,9 +185,10 @@
 
   /* ===== Layout ===== */
   .canvas{
-    max-width:1400px;
+    width:calc(100% - 20px);
+    max-width:none;
     margin:0 auto;
-    padding:20px 28px 60px;
+    padding:20px 4px 60px;
     display:grid;
     grid-template-columns:repeat(12, 1fr);
     gap:14px;
@@ -202,13 +203,13 @@
   }
   .card:hover{box-shadow:var(--shadow-hover);}
   .card-title{
-    font-size:13px;
+    font-size:15px;
     font-weight:600;
     color:var(--ink);
     margin-bottom:2px;
   }
   .card-sub{
-    font-size:11px;
+    font-size:12.5px;
     color:var(--ink-faint);
     margin-bottom:12px;
   }
@@ -217,7 +218,7 @@
   .kpi-card{grid-column:span 3;}
   .kpi-card.kpi-six{grid-column:span 4;}
   .kpi-value{
-    font-size:30px;
+    font-size:32px;
     font-weight:700;
     line-height:1.1;
     margin:6px 0 4px;
@@ -251,7 +252,7 @@
   }
   .cheque-mini-kpi .label{
     display:block;
-    font-size:10.5px;
+    font-size:11.5px;
     font-weight:600;
     color:var(--ink-faint);
     text-transform:uppercase;
@@ -269,8 +270,8 @@
   }
   .cheque-mini-kpi .sub{
     display:block;
-    margin-top:2px;
-    font-size:11px;
+    margin-top:3px;
+    font-size:12px;
     color:var(--ink-dim);
   }
   .cheque-mini-kpi.danger .value{color:var(--danger);}
@@ -337,17 +338,17 @@
 
   .cadena-breakdown-row:hover td{background:#faf9f8;}
   .barrow.dimmed{opacity:.35;}
-  .barrow .name{font-family:var(--font-mono); font-size:12px; color:var(--ink-dim); font-weight:600;}
+  .barrow .name{font-family:var(--font-mono); font-size:13px; color:var(--ink-dim); font-weight:600;}
   .barrow .track{background:#edebe9; border-radius:2px; height:14px; overflow:hidden;}
   .barrow .fill{height:100%; background:var(--accent); border-radius:2px; transition:width .3s ease;}
   .barrow.selected .fill{background:var(--accent-dark);}
-  .barrow .val{font-family:var(--font-mono); font-size:12px; text-align:right; color:var(--ink);}
+  .barrow .val{font-family:var(--font-mono); font-size:13px; text-align:right; color:var(--ink);}
 
   /* Table */
   .table-wrap{overflow-x:auto; max-height:480px; overflow-y:auto;}
 
   /* ===== Matrix table (morosidad x condicion) ===== */
-  .matrix-table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  .matrix-table{width:100%; border-collapse:collapse; font-size:13.5px;}
   .matrix-table th, .matrix-table td{
     padding:9px 14px;
     border:1px solid var(--border);
@@ -361,6 +362,15 @@
     text-align:center;
   }
   .matrix-table th.row-head{text-align:left; background:#f3f9ff;}
+  .client-link{
+    color:var(--accent-dark);
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    border-bottom:1px dashed rgba(0,90,158,.45);
+  }
+  .client-link:hover{color:var(--accent); border-bottom-color:var(--accent);}
+  .client-link.active{background:#eef6ff; border-radius:3px; padding:2px 5px; border-bottom-color:transparent;}
   .matrix-table td.row-head{
     text-align:left; font-weight:600; background:#faf9f8; color:var(--ink);
   }
@@ -380,12 +390,12 @@
   }
   .matrix-table tr.total-row td.total-col{background:#ffe985;}
 
-  table{width:100%; border-collapse:collapse; font-size:12.5px;}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
   thead th{
     position:sticky; top:0; background:#f3f9ff; z-index:1;
     text-align:center;
     font-weight:600;
-    font-size:11px;
+    font-size:12px;
     letter-spacing:.02em;
     text-transform:uppercase;
     color:var(--ink-dim);
@@ -549,10 +559,11 @@
   select:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent);}
 
   footer{
-    max-width:1400px; margin:0 auto; padding:0 28px 30px;
-    font-size:11px; color:var(--ink-faint);
+    width:calc(100% - 20px); max-width:none; margin:0 auto; padding:0 4px 30px;
+    font-size:12px; color:var(--ink-faint);
     display:flex; justify-content:space-between;
   }
+
 
   @media (max-width:1100px){
     .kpi-card{grid-column:span 6;}
@@ -724,7 +735,7 @@
 
     <div class="card table-card">
       <div class="card-title">Detalle de facturas</div>
-      <div class="card-sub">Respeta todos los filtros activos. Busca por nombre, entidad o número.</div>
+      <div class="card-sub">Respeta todos los filtros activos. Busca por cliente, entidad o número · click en un cliente para ver todas sus facturas.</div>
       <div id="detailActiveFilters" style="display:none; margin-bottom:12px; flex-wrap:wrap; gap:6px; align-items:center;"></div>
       <div class="controls">
         <input type="text" id="searchBox" placeholder="Buscar entidad, nombre o número...">
@@ -739,16 +750,17 @@
           <thead>
             <tr>
               <th style="width:4px; padding:0; cursor:default;"></th>
-              <th data-key="NOMBRE_ENT">Entidad</th>
+              <th data-key="NOMBRE_ENT">Cliente</th>
               <th data-key="COMUNA">Comuna</th>
               <th data-key="VENDEDOR">Vendedor</th>
               <th data-key="NUMERO">N&deg; Doc</th>
               <th data-key="EMISION">Emisión</th>
+              <th data-key="PRI_VENCIM">Vencimiento</th>
               <th data-key="DIAS_MOR" class="num">Días</th>
               <th data-key="TOTAL" class="num">Total</th>
               <th data-key="SALDO_VENC" class="num">Saldo Venc.</th>
               <th data-key="MOROSIDAD">Morosidad</th>
-              <th data-key="CONDICION2">Condición</th>
+              <th data-key="CONDICION">Condición de pago</th>
               <th data-key="CADENA">Cadena</th>
             </tr>
           </thead>
@@ -1180,6 +1192,7 @@ function clearAllFilters(){
   tableOnlyCadenaFilter = '';
   tableOnlyVendedorFilter = '';
   tableOnlyComunaFilter = '';
+  tableOnlyClienteFilter = '';
   regionalExpanded = false;
   buildCadenaChips();
   renderAll();
@@ -1208,7 +1221,7 @@ function getFilteredData(excludeDimension){
 }
 
 function hasAnyFilter(){
-  return Object.keys(activeFilters).length > 0 || cadenaChipFilter !== '';
+  return Object.keys(activeFilters).length > 0 || cadenaChipFilter !== '' || tableOnlyCadenaFilter || tableOnlyVendedorFilter || tableOnlyComunaFilter || tableOnlyClienteFilter;
 }
 
 /* ===== Master render: everything reacts to activeFilters ===== */
@@ -1239,7 +1252,7 @@ const DIM_LABELS = {CADENA:'Cadena', VENDEDOR:'Vendedor', MOROSIDAD:'Morosidad',
 function updateFilterStrip(){
   const strip = document.getElementById('filterStrip');
   const row = document.getElementById('activeChipsRow');
-  const anyLocal = tableOnlyCadenaFilter || tableOnlyVendedorFilter;
+  const anyLocal = tableOnlyCadenaFilter || tableOnlyVendedorFilter || tableOnlyComunaFilter || tableOnlyClienteFilter;
   if(!hasAnyFilter() && !anyLocal){ strip.classList.remove('show'); row.innerHTML=''; return; }
   strip.classList.add('show');
 
@@ -1257,6 +1270,9 @@ function updateFilterStrip(){
   if(tableOnlyVendedorFilter){
     html += `<span class="active-filter-chip" style="background:var(--ink-dim);">Tabla &middot; Vendedor: ${tableOnlyVendedorFilter}<span class="x" data-dim="__tablevendedor">&times;</span></span>`;
   }
+  if(tableOnlyClienteFilter){
+    html += `<span class="active-filter-chip" style="background:var(--ink-dim);">Tabla &middot; Cliente: ${escapeHTML(tableOnlyClienteFilter)}<span class="x" data-dim="__tablecliente">&times;</span></span>`;
+  }
   html += `<button class="reset-btn" id="resetBtnInline" style="margin-left:auto;">&#8635; Borrar todos los filtros</button>`;
   row.innerHTML = html;
   row.querySelectorAll('.x').forEach(x=>{
@@ -1273,6 +1289,9 @@ function updateFilterStrip(){
       } else if(x.dataset.dim === '__tablevendedor'){
         tableOnlyVendedorFilter = '';
         updateVendedorBars();
+        renderAll();
+      } else if(x.dataset.dim === '__tablecliente'){
+        tableOnlyClienteFilter = '';
         renderAll();
       } else {
         clearFilter(x.dataset.dim);
@@ -1302,6 +1321,9 @@ function updateDetailActiveFilters(){
   }
   if(tableOnlyComunaFilter){
     chips.push(`<span class="active-filter-chip" style="background:var(--ink-dim); padding:4px 10px;">Comuna (tabla): ${tableOnlyComunaFilter}</span>`);
+  }
+  if(tableOnlyClienteFilter){
+    chips.push(`<span class="active-filter-chip" style="background:var(--ink-dim); padding:4px 10px;">Cliente (tabla): ${escapeHTML(tableOnlyClienteFilter)}</span>`);
   }
 
   if(chips.length === 0){
@@ -1483,6 +1505,7 @@ let cadenaChipFilter = '';       // '', GRUPO_REGIONAL, 'COBERTURA', or a specif
 let tableOnlyCadenaFilter = '';  // filtro que SOLO afecta la tabla de detalle, no el resto del dashboard
 let tableOnlyVendedorFilter = ''; // idem, para el ranking de vendedor
 let tableOnlyComunaFilter = '';   // idem, para la tabla de deuda por comuna
+let tableOnlyClienteFilter = '';  // idem, al hacer click en un cliente dentro de la tabla de detalle
 let regionalExpanded = false;
 
 function cadenaGrupo(cadena){
@@ -2375,9 +2398,12 @@ function renderTable(baseRows){
   if(tableOnlyComunaFilter){
     rows = rows.filter(r=> r.COMUNA === tableOnlyComunaFilter);
   }
+  if(tableOnlyClienteFilter){
+    rows = rows.filter(r=> (r.CLIENTE || r.NOMBRE_ENT || r.ENTIDAD || '') === tableOnlyClienteFilter);
+  }
   if(q){
     rows = rows.filter(r=>{
-      const hay = (r.NOMBRE_ENT+' '+r.ENTIDAD+' '+r.NUMERO).toLowerCase();
+      const hay = [r.CLIENTE, r.NOMBRE_ENT, r.ENTIDAD, r.NUMERO, r.CONDICION, r.CONDICION2].filter(Boolean).join(' ').toLowerCase();
       return hay.includes(q);
     });
   }
@@ -2391,24 +2417,37 @@ function renderTable(baseRows){
   });
 
   const cap = rows.slice(0,200);
-  document.getElementById('tableBody').innerHTML = cap.map(r=>{
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = cap.map(r=>{
     const sev = severityInfo(r.MOROSIDAD);
+    const cliente = r.CLIENTE || r.NOMBRE_ENT || r.ENTIDAD || '—';
+    const clientActive = tableOnlyClienteFilter && cliente === tableOnlyClienteFilter;
     return `
     <tr>
       <td class="severity-bar"><span style="background:${sev.color};"></span></td>
-      <td class="entity-cell">${r.NOMBRE_ENT}</td>
-      <td>${r.COMUNA}</td>
-      <td>${r.VENDEDOR}</td>
-      <td class="num">${r.NUMERO}</td>
-      <td>${fechaDMA(r.EMISION)}</td>
-      <td class="num dias-num ${sev.cls}">${r.DIAS_MOR}</td>
+      <td class="entity-cell"><span class="client-link${clientActive?' active':''}" data-cliente="${escapeHTML(cliente)}" title="Ver todas las facturas de este cliente">${escapeHTML(cliente)}</span></td>
+      <td>${escapeHTML(r.COMUNA || '—')}</td>
+      <td>${escapeHTML(r.VENDEDOR || '—')}</td>
+      <td class="num">${escapeHTML(r.NUMERO ?? '—')}</td>
+      <td>${r.EMISION ? fechaDMA(r.EMISION) : '—'}</td>
+      <td>${r.PRI_VENCIM ? fechaDMA(r.PRI_VENCIM) : '—'}</td>
+      <td class="num dias-num ${sev.cls}">${r.DIAS_MOR ?? '—'}</td>
       <td class="num">${money(r.TOTAL)}</td>
       <td class="num">${money(r.SALDO_VENC)}</td>
       <td>${morosidadTag(r.MOROSIDAD)}</td>
-      <td>${r.CONDICION2}</td>
-      <td>${r.CADENA}</td>
+      <td>${escapeHTML(r.CONDICION || '—')}</td>
+      <td>${escapeHTML(r.CADENA || '—')}</td>
     </tr>`;
   }).join('');
+
+  tbody.querySelectorAll('.client-link').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const cliente = el.dataset.cliente || '';
+      tableOnlyClienteFilter = (tableOnlyClienteFilter === cliente) ? '' : cliente;
+      renderAll();
+    });
+  });
+
   document.getElementById('rowCount').textContent =
     `Mostrando ${cap.length} de ${rows.length} filas (${DATA.length} total)`;
 }
