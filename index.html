@@ -85,6 +85,16 @@
     font-size:22px;
     font-weight:600;
     color:var(--ink);
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .title-update{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-faint);
+    white-space:nowrap;
   }
   .topbar .subtitle{
     font-size:13px;
@@ -592,7 +602,7 @@
 
   <div class="topbar">
     <div>
-      <h1>Cartera de Deuda &mdash; Facturas FCV</h1>
+      <h1>Cartera de Deuda &mdash; Facturas FCV <span class="title-update" id="titleUpdate"></span></h1>
       <div class="subtitle">Comercial Hamburgo Ltda. &middot; Fuente: Random ERP</div>
     </div>
     <div class="topbar-right">
@@ -884,6 +894,7 @@ Chart.defaults.color = '#605e5c';
 const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=0&single=true&output=csv';
 const HISTORICO_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=179707393&single=true&output=csv';
 const CHEQUES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=1972109013&single=true&output=csv';
+const ACTUALIZACION_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=785918253&single=true&output=csv';
 
 /* Parser CSV simple pero robusto: respeta comillas, comas dentro de comillas,
    y comillas escapadas ("") dentro de un campo entrecomillado. */
@@ -1038,11 +1049,20 @@ Promise.all([
     console.error('Error cargando cheques:', err);
     CHEQUES_LOAD_ERROR = true;
     return null;
+  }),
+  fetchTextChecked(ACTUALIZACION_CSV_URL, 'Fecha actualización').catch(err => {
+    console.error('Error cargando fecha de actualización:', err);
+    return null;
   })
-]).then(([csvText, historicoText, chequesText]) => {
+]).then(([csvText, historicoText, chequesText, actualizacionText]) => {
   DATA = csvToRecords(csvText);
   if(historicoText) HISTORICO = csvToHistorico(historicoText);
   if(chequesText) CHEQUES = csvToCheques(chequesText);
+  if(actualizacionText){
+    const rowsFecha = parseCSV(actualizacionText.replace(/^\uFEFF/, ''));
+    const valorA1 = rowsFecha.length && rowsFecha[0].length ? String(rowsFecha[0][0] || '').trim() : '';
+    if(valorA1) document.getElementById('titleUpdate').textContent = `Actualizado: ${valorA1}`;
+  }
   init();
   hideLoadingOverlay();
 }).catch(err => {
