@@ -1,0 +1,2501 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Cartera Comercial Hamburgo</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<style>
+  :root{
+    --bg:#f3f2f1;
+    --card:#ffffff;
+    --border:#e1dfdd;
+    --border-strong:#c8c6c4;
+    --ink:#201f1e;
+    --ink-dim:#605e5c;
+    --ink-faint:#8a8886;
+    --accent:#118dff;
+    --accent-dark:#0d6dc7;
+    --danger:#d13438;
+    --warn:#f2a900;
+    --ok:#107c10;
+    --lily:#2266d3;
+    --eltit:#d13438;
+    --trebol:#107c10;
+    --cobertura:#f2a900;
+    --regional:#118dff;
+    --font-ui:'Segoe UI', 'Inter', -apple-system, sans-serif;
+    --font-mono:'Consolas', 'IBM Plex Mono', monospace;
+    --shadow-card: 0 1.6px 3.6px rgba(0,0,0,.09), 0 0.3px 0.9px rgba(0,0,0,.06);
+    --shadow-hover: 0 3.2px 7.2px rgba(0,0,0,.13), 0 0.6px 1.8px rgba(0,0,0,.08);
+  }
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    font-size:15px;
+    padding:0;
+    min-height:100vh;
+  }
+
+  /* ===== Top bar ===== */
+  /* ===== Loading overlay ===== */
+  .loading-overlay{
+    position:fixed; inset:0; z-index:200;
+    background:linear-gradient(135deg, #f3f2f1 0%, #e8f2ff 100%);
+    display:flex; align-items:center; justify-content:center;
+    transition:opacity .35s ease, visibility .35s ease;
+  }
+  .loading-overlay.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  .loading-box{
+    background:#fff; border-radius:10px; padding:40px 48px;
+    box-shadow:0 12px 40px rgba(0,0,0,.14);
+    display:flex; flex-direction:column; align-items:center; gap:16px;
+    min-width:300px;
+  }
+  .loading-spinner{
+    width:44px; height:44px; border-radius:50%;
+    border:4px solid #e1dfdd; border-top-color:var(--accent);
+    animation:spin .8s linear infinite;
+  }
+  @keyframes spin{ to{ transform:rotate(360deg); } }
+  .loading-text{
+    font-size:15px; font-weight:600; color:var(--ink);
+    text-align:center;
+  }
+  .loading-sub{
+    font-size:12px; color:var(--ink-faint);
+    text-align:center;
+  }
+
+  .topbar{
+    background:var(--card);
+    border-bottom:1px solid var(--border);
+    padding:14px 14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:12px;
+  }
+  .topbar h1{
+    font-size:22px;
+    font-weight:600;
+    color:var(--ink);
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    flex-wrap:wrap;
+  }
+  .title-update{
+    font-size:13px;
+    font-weight:500;
+    color:var(--ink-faint);
+    white-space:nowrap;
+  }
+  .topbar .subtitle{
+    font-size:13px;
+    color:var(--ink-faint);
+    margin-top:2px;
+  }
+  .topbar-right{
+    display:flex;
+    align-items:center;
+    gap:14px;
+  }
+  .reset-btn{
+    display:flex;
+    align-items:center;
+    gap:6px;
+    background:var(--card);
+    border:1px solid var(--border-strong);
+    color:var(--ink-dim);
+    font-family:var(--font-ui);
+    font-size:13.5px;
+    font-weight:600;
+    padding:8px 15px;
+    border-radius:3px;
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .reset-btn:hover{border-color:var(--accent); color:var(--accent); background:#f0f7ff;}
+  .reset-btn:disabled{opacity:.4; cursor:default; border-color:var(--border); color:var(--ink-faint); background:var(--card);}
+  .meta{font-size:11.5px; color:var(--ink-faint); font-family:var(--font-mono);}
+
+  /* ===== Cadena chip filter ===== */
+  .chip-row{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+  .chip{
+    font-family:var(--font-ui);
+    font-size:13px;
+    font-weight:600;
+    padding:6px 14px;
+    border-radius:14px;
+    border:1px solid var(--border-strong);
+    background:var(--card);
+    color:var(--ink-dim);
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--accent); color:var(--accent-dark);}
+  .chip.active{
+    background:var(--accent);
+    border-color:var(--accent);
+    color:#fff;
+  }
+  .chip-group{display:inline-flex; align-items:center; gap:4px;}
+  .chip-expand{
+    font-size:11px;
+    width:22px; height:22px;
+    display:flex; align-items:center; justify-content:center;
+    border-radius:50%;
+    border:1px solid var(--border-strong);
+    background:var(--card);
+    color:var(--ink-faint);
+    cursor:pointer;
+    transition:all .12s ease;
+  }
+  .chip-expand:hover{border-color:var(--accent); color:var(--accent-dark);}
+  .sub-chip-row{
+    margin-top:6px;
+    padding-left:16px;
+    border-left:2px solid var(--border);
+    display:flex; gap:8px; flex-wrap:wrap;
+  }
+  .sub-chip{font-size:11px; padding:5px 12px; opacity:.9;}
+
+  /* ===== Filter chips (active cross-filters) ===== */
+  .filter-strip{
+    background:#eef6ff;
+    border-bottom:1px solid #d0e7ff;
+    padding:8px 14px;
+    display:none;
+    align-items:center;
+    gap:8px;
+    flex-wrap:wrap;
+  }
+  .filter-strip.show{display:flex;}
+  .filter-strip .fs-label{
+    font-size:11.5px; font-weight:600; color:var(--accent-dark);
+    text-transform:uppercase; letter-spacing:.03em;
+  }
+  .active-filter-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--accent); color:#fff;
+    font-size:12px; font-weight:500;
+    padding:4px 8px 4px 10px; border-radius:3px;
+  }
+  .active-filter-chip .x{
+    cursor:pointer; opacity:.8; font-size:14px; line-height:1;
+    width:14px; height:14px; display:flex; align-items:center; justify-content:center;
+  }
+  .active-filter-chip .x:hover{opacity:1;}
+
+  /* ===== Layout ===== */
+  .canvas{
+    width:calc(100% - 20px);
+    max-width:none;
+    margin:0 auto;
+    padding:20px 4px 60px;
+    display:grid;
+    grid-template-columns:repeat(12, 1fr);
+    gap:14px;
+  }
+  .card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:4px;
+    box-shadow:var(--shadow-card);
+    padding:16px 18px;
+    transition:box-shadow .15s ease;
+  }
+  .card:hover{box-shadow:var(--shadow-hover);}
+  .card-title{
+    font-size:15px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:2px;
+  }
+  .card-sub{
+    font-size:12.5px;
+    color:var(--ink-faint);
+    margin-bottom:12px;
+  }
+
+  /* KPI cards */
+  .kpi-card{grid-column:span 3;}
+  .kpi-card.kpi-six{grid-column:span 4;}
+  .kpi-value{
+    font-size:32px;
+    font-weight:700;
+    line-height:1.1;
+    margin:6px 0 4px;
+    font-variant-numeric:tabular-nums;
+  }
+  .kpi-card.c-danger .kpi-value{color:var(--danger);}
+  .kpi-card.c-ok .kpi-value{color:var(--ok);}
+  .kpi-card.c-accent .kpi-value{color:var(--accent-dark);}
+  .kpi-card.c-warn .kpi-value{color:#a86f00;}
+  .kpi-card.c-regional .kpi-value{color:var(--regional);}
+  .kpi-sub{font-size:12px; color:var(--ink-dim);}
+  .kpi-bar{
+    height:4px; border-radius:2px; background:var(--border); margin-top:10px; overflow:hidden;
+  }
+  .kpi-bar-fill{height:100%; border-radius:2px;}
+
+  /* Resumen complementario de cheques/documentos */
+  .cheque-summary-card{grid-column:span 12;}
+  .cheque-kpi-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0,1fr));
+    gap:10px;
+    margin:4px 0 14px;
+  }
+  .cheque-mini-kpi{
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:#faf9f8;
+    padding:11px 13px;
+    min-width:0;
+  }
+  .cheque-mini-kpi .label{
+    display:block;
+    font-size:11.5px;
+    font-weight:600;
+    color:var(--ink-faint);
+    text-transform:uppercase;
+    letter-spacing:.03em;
+    margin-bottom:4px;
+  }
+  .cheque-mini-kpi .value{
+    display:block;
+    font-family:var(--font-mono);
+    font-size:20px;
+    font-weight:700;
+    color:var(--ink);
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+  .cheque-mini-kpi .sub{
+    display:block;
+    margin-top:3px;
+    font-size:12px;
+    color:var(--ink-dim);
+  }
+  .cheque-mini-kpi.danger .value{color:var(--danger);}
+  .cheque-mini-kpi.warn .value{color:#946400;}
+  .cheque-status-badge{
+    display:inline-block;
+    padding:2px 8px;
+    border-radius:10px;
+    font-size:10.5px;
+    font-weight:700;
+    white-space:nowrap;
+  }
+  .cheque-status-badge.ok{background:#dff6dd; color:#0b6a0b;}
+  .cheque-status-badge.warn{background:#fff4ce; color:#8a6d00;}
+  .cheque-status-badge.danger{background:#fde7e9; color:#a4262c;}
+  .cheque-summary-actions{
+    display:flex;
+    align-items:stretch;
+  }
+  .cheque-action-tile{
+    border:1px solid var(--border);
+    border-radius:4px;
+    background:linear-gradient(180deg, #fbfbfb 0%, #f6f6f6 100%);
+    padding:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-height:82px;
+  }
+  .cheque-detail-btn{
+    min-width:150px;
+    justify-content:center;
+    font-size:13px;
+    padding:10px 16px;
+  }
+
+  /* Chart cards */
+  .chart-card-cadena{grid-column:span 5;}
+  .chart-card-vendedor{grid-column:span 7;}
+  .table-card{grid-column:span 12;}
+
+  canvas{cursor:pointer;}
+  .canvas-wrap{position:relative; height:340px; width:100%;}
+
+  /* Clickable bar list (vendedor) */
+  .barlist{display:flex; flex-direction:column; gap:2px;}
+  .barrow{
+    display:grid; grid-template-columns:70px 1fr 100px; align-items:center; gap:10px;
+    padding:5px 4px; border-radius:3px; cursor:pointer; transition:background .1s ease;
+  }
+  .barrow:hover{background:#f5f5f5;}
+  .barrow.selected{background:#eef6ff;}
+  .cadena-breakdown-row.selected td{background:#eef6ff; font-weight:700;}
+  .cadena-badge{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:4px 12px;
+    border-radius:14px;
+    font-size:12.5px;
+    font-weight:700;
+    color:#fff;
+    letter-spacing:.02em;
+  }
+  .cadena-badge .dot{width:8px; height:8px; border-radius:50%; background:#fff; opacity:.85;}
+
+  .cadena-breakdown-row:hover td{background:#faf9f8;}
+  .barrow.dimmed{opacity:.35;}
+  .barrow .name{font-family:var(--font-mono); font-size:13px; color:var(--ink-dim); font-weight:600;}
+  .barrow .track{background:#edebe9; border-radius:2px; height:14px; overflow:hidden;}
+  .barrow .fill{height:100%; background:var(--accent); border-radius:2px; transition:width .3s ease;}
+  .barrow.selected .fill{background:var(--accent-dark);}
+  .barrow .val{font-family:var(--font-mono); font-size:13px; text-align:right; color:var(--ink);}
+
+  /* Table */
+  .table-wrap{overflow-x:auto; max-height:480px; overflow-y:auto;}
+
+  /* ===== Matrix table (morosidad x condicion) ===== */
+  .matrix-table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  .matrix-table th, .matrix-table td{
+    padding:9px 14px;
+    border:1px solid var(--border);
+    text-align:right;
+    white-space:nowrap;
+  }
+  .matrix-table th{
+    background:#f3f9ff;
+    font-weight:600;
+    color:var(--ink-dim);
+    text-align:center;
+  }
+  .matrix-table th.row-head{text-align:left; background:#f3f9ff;}
+  .client-link{
+    color:var(--accent-dark);
+    font-weight:600;
+    cursor:pointer;
+    text-decoration:none;
+    border-bottom:1px dashed rgba(0,90,158,.45);
+  }
+  .client-link:hover{color:var(--accent); border-bottom-color:var(--accent);}
+  .client-link.active{background:#eef6ff; border-radius:3px; padding:2px 5px; border-bottom-color:transparent;}
+  .matrix-table td.row-head{
+    text-align:left; font-weight:600; background:#faf9f8; color:var(--ink);
+  }
+  .matrix-table td.corner{background:#f3f9ff;}
+  .matrix-table td.cell{
+    font-family:var(--font-mono);
+    cursor:pointer;
+    transition:background .1s ease, box-shadow .1s ease;
+  }
+  .matrix-table td.cell:hover{background:#eef6ff; box-shadow:inset 0 0 0 1.5px var(--accent);}
+  .matrix-table td.cell.selected{background:var(--accent); color:#fff; font-weight:700;}
+  .matrix-table td.cell.dimmed{opacity:.35;}
+  .matrix-table td.cell.zero{color:var(--ink-faint); cursor:default;}
+  .matrix-table td.cell.zero:hover{background:none; box-shadow:none;}
+  .matrix-table tr.total-row td, .matrix-table td.total-col{
+    background:#fff8dc; font-weight:700; color:#7a5c00;
+  }
+  .matrix-table tr.total-row td.total-col{background:#ffe985;}
+
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  thead th{
+    position:sticky; top:0; background:#f3f9ff; z-index:1;
+    text-align:center;
+    font-weight:600;
+    font-size:12px;
+    letter-spacing:.02em;
+    text-transform:uppercase;
+    color:var(--ink-dim);
+    border-bottom:2px solid var(--border-strong);
+    padding:10px 12px;
+    white-space:nowrap;
+    cursor:pointer;
+    user-select:none;
+  }
+  thead th:hover{color:var(--accent-dark); background:#e8f2ff;}
+  thead th .sort-arrow{
+    display:inline-block; margin-left:4px; font-size:9px; color:var(--accent);
+  }
+  tbody tr{position:relative;}
+  tbody tr:nth-child(even){background:#fafbfc;}
+  tbody td{
+    padding:9px 12px;
+    border-bottom:1px solid var(--border);
+    white-space:nowrap;
+    color:var(--ink);
+  }
+  tbody tr:hover td{background:#eef6ff;}
+  tbody td.entity-cell{font-weight:600; color:var(--ink);}
+  tbody td.severity-bar{
+    padding:0; width:4px; border-bottom:1px solid var(--border);
+  }
+  tbody td.severity-bar span{display:block; height:100%; width:4px;}
+  .num{font-family:var(--font-mono); text-align:right;}
+  .dias-num{font-weight:700;}
+  .dias-num.sev-danger{color:var(--danger);}
+  .dias-num.sev-warn{color:#946400;}
+  .dias-num.sev-ok{color:var(--ok);}
+  .tag{
+    display:inline-block;
+    padding:2px 9px;
+    border-radius:10px;
+    font-size:11px;
+    font-weight:600;
+  }
+  .tag.danger{background:#fde7e9; color:#a4262c;}
+  .tag.warn{background:#fff4ce; color:#8a6d00;}
+  .tag.ok{background:#dff6dd; color:#0b6a0b;}
+
+  .controls{
+    display:flex;
+    gap:10px;
+    margin-bottom:14px;
+    flex-wrap:wrap;
+  }
+  input[type=text]{
+    background:var(--card);
+    border:1px solid var(--border-strong);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    font-size:12.5px;
+    padding:7px 12px;
+    border-radius:3px;
+    min-width:240px;
+  }
+  input[type=text]:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent);}
+
+  .cadena-detail-btn{
+    display:flex; align-items:center; gap:6px;
+    border:none; color:#fff;
+    font-family:var(--font-ui); font-size:12.5px; font-weight:600;
+    padding:7px 14px; border-radius:3px; cursor:pointer;
+    transition:filter .12s ease;
+  }
+  .cadena-detail-btn:hover{filter:brightness(1.1);}
+
+  /* ===== Modal: arbol Cadena > Comuna > Direccion ===== */
+  .modal-overlay{
+    display:none; position:fixed; inset:0; background:rgba(0,0,0,.45);
+    z-index:100; align-items:center; justify-content:center; padding:24px;
+  }
+  .modal-overlay.show{display:flex;}
+  .modal-box{
+    background:#fff; border-radius:6px; width:100%; max-width:880px;
+    max-height:90vh; display:flex; flex-direction:column;
+    box-shadow:0 8px 32px rgba(0,0,0,.28);
+  }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:16px 20px; border-bottom:1px solid var(--border);
+    color:#fff; border-radius:6px 6px 0 0;
+  }
+  .modal-header h3{font-size:19px; font-weight:700;}
+  .modal-header .modal-close{
+    cursor:pointer; background:rgba(255,255,255,.2); border:none; color:#fff;
+    width:26px; height:26px; border-radius:50%; font-size:15px; line-height:1;
+  }
+  .modal-header .modal-close:hover{background:rgba(255,255,255,.35);}
+  .modal-sub{padding:10px 20px 0; font-size:13.5px; color:var(--ink-faint);}
+  .modal-body{overflow-y:auto; padding:12px 20px 20px; flex:1;}
+  .modal-select-bar{
+    display:flex; align-items:center; gap:12px;
+    padding:8px 20px; background:#eef6ff; border-bottom:1px solid #d0e7ff;
+    font-size:12.5px; font-weight:600; color:var(--accent-dark);
+  }
+  .modal-select-bar .reset-btn{margin-left:auto;}
+  .factura-row-selectable{cursor:pointer;}
+  .factura-row-selectable.selected td{background:#eef6ff;}
+  .factura-row-selectable input[type=checkbox]{cursor:pointer;}
+
+  .tree-comuna{
+    border-bottom:1px solid var(--border);
+  }
+  .tree-comuna-head{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:10px 4px; cursor:pointer; user-select:none;
+  }
+  .tree-comuna-head:hover{background:#faf9f8;}
+  .tree-comuna-head .name{font-weight:700; font-size:15px; display:flex; align-items:center; gap:8px;}
+  .tree-comuna-head .caret{
+    display:inline-block; transition:transform .15s ease; font-size:10px; color:var(--ink-faint);
+  }
+  .tree-comuna-head.open .caret{transform:rotate(90deg);}
+  .tree-comuna-head .amount{font-family:var(--font-mono); font-weight:700; font-size:15px; color:var(--ink);}
+  .amount-group{display:flex; align-items:center; gap:10px;}
+  .dias-badge{
+    font-family:var(--font-mono); font-size:12.5px; font-weight:700;
+    color:var(--ink); background:#f3f2f1;
+    padding:3px 9px; border-radius:10px; white-space:nowrap;
+  }
+  .tree-direcciones{display:none; padding-left:22px; padding-bottom:6px;}
+  .tree-direcciones.open{display:block;}
+  .tree-direccion-row{
+    display:flex; justify-content:space-between; gap:12px;
+    padding:8px 4px; font-size:14px; border-top:1px solid #f3f2f1;
+  }
+  .tree-direccion-row:hover{background:#faf9f8;}
+  .tree-direccion-row .dname{color:var(--ink);}
+  .tree-direccion-row .damount{font-family:var(--font-mono); color:var(--ink); font-weight:600;}
+  .tree-col-headers{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:9px 4px; margin-bottom:2px;
+    border-bottom:2px solid var(--border-strong);
+    font-size:12px; font-weight:700; text-transform:uppercase; letter-spacing:.03em;
+    color:var(--ink-dim);
+  }
+  .tree-col-headers .col-right{display:flex; align-items:center; gap:10px;}
+  .tree-col-headers .col-dias{width:52px; text-align:center;}
+  .tree-col-headers .col-monto{min-width:120px; text-align:right;}
+  .modal-total{
+    display:flex; justify-content:space-between; align-items:center;
+    padding:14px 22px; border-top:2px solid var(--border-strong);
+    background:#fff8dc; font-weight:700; font-size:16px;
+  }
+
+  select{
+    background:var(--card);
+    border:1px solid var(--border-strong);
+    color:var(--ink);
+    font-family:var(--font-ui);
+    font-size:12.5px;
+    padding:7px 10px;
+    border-radius:3px;
+    min-width:180px;
+    cursor:pointer;
+  }
+  select:focus{outline:2px solid var(--accent); outline-offset:-1px; border-color:var(--accent);}
+
+  footer{
+    width:calc(100% - 20px); max-width:none; margin:0 auto; padding:0 4px 30px;
+    font-size:12px; color:var(--ink-faint);
+    display:flex; justify-content:space-between;
+  }
+
+
+  @media (max-width:1100px){
+    .kpi-card{grid-column:span 6;}
+    .kpi-card.kpi-six{grid-column:span 6;}
+    .chart-card-cadena, .chart-card-vendedor{grid-column:span 12;}
+    .cheque-kpi-grid{grid-template-columns:repeat(2, minmax(0,1fr));}
+    .cheque-summary-actions{grid-column:1 / -1;}
+  }
+  @media (max-width:640px){
+    .kpi-card{grid-column:span 12;}
+    .kpi-card.kpi-six{grid-column:span 12;}
+    .cheque-kpi-grid{grid-template-columns:1fr;}
+    .cheque-action-tile{min-height:72px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-box">
+      <div class="loading-spinner"></div>
+      <div class="loading-text">Obteniendo datos, un momento por favor&hellip;</div>
+      <div class="loading-sub">Cargando desde Google Sheets</div>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <div>
+      <h1>Cartera de Deuda &mdash; Facturas FCV <span class="title-update" id="titleUpdate"></span></h1>
+      <div class="subtitle">Comercial Hamburgo Ltda. &middot; Fuente: Random ERP</div>
+    </div>
+    <div class="topbar-right">
+      <span class="meta" id="metaInfo">cargando&hellip;</span>
+      <button class="reset-btn" id="resetBtn" disabled>&#8635; Borrar filtros</button>
+    </div>
+  </div>
+
+  <div class="filter-strip" id="filterStrip">
+    <span class="fs-label">Filtros activos:</span>
+    <div id="activeChipsRow" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+  </div>
+
+  <div class="canvas">
+
+    <div class="card table-card">
+      <div class="card-title">Deuda por morosidad y condición de pago</div>
+      <div class="card-sub">Suma SALDO_DOCU &middot; click en una celda para filtrar por ambas dimensiones</div>
+      <div class="table-wrap" style="max-height:none;">
+        <table id="matrixTable" class="matrix-table"></table>
+      </div>
+    </div>
+
+    <div class="card cheque-summary-card" id="chequeSummaryPanel">
+      <div class="card-title">Cheques en cartera por depositar</div>
+      <div class="card-sub" id="chequeSummarySub">Resumen de la hoja complementaria</div>
+
+      <div class="cheque-kpi-grid">
+        <div class="cheque-mini-kpi">
+          <span class="label">Monto total</span>
+          <span class="value" id="chequeMontoTotal">&mdash;</span>
+          <span class="sub" id="chequeMontoTotalSub">cargando&hellip;</span>
+        </div>
+        <div class="cheque-mini-kpi">
+          <span class="label">Documentos en cartera</span>
+          <span class="value" id="chequeCantidad">&mdash;</span>
+          <span class="sub" id="chequeCantidadSub">cargando&hellip;</span>
+        </div>
+        <div class="cheque-summary-actions">
+          <div class="cheque-action-tile">
+            <button class="reset-btn cheque-detail-btn" id="chequeDetailBtn">Ver detalle</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card kpi-card kpi-six c-danger">
+      <div class="card-title">Deuda DEU-BAGLEY</div>
+      <div class="kpi-value" id="kpiDeuBagley">&mdash;</div>
+      <div class="kpi-sub" id="kpiDeuBagleySub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiDeuBagleyBar" style="background:var(--danger); width:0%"></div></div>
+    </div>
+
+    <div class="card kpi-card kpi-six c-warn">
+      <div class="card-title">Total deuda Cobertura sin cheques en cartera</div>
+      <div class="kpi-value" id="kpiCobertura">&mdash;</div>
+      <div class="kpi-sub" id="kpiCoberturaSub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiCoberturaBar" style="background:var(--cobertura); width:0%"></div></div>
+    </div>
+
+    <div class="card kpi-card kpi-six c-regional">
+      <div class="card-title">Total deuda Supermercado Regional</div>
+      <div class="kpi-value" id="kpiRegional">&mdash;</div>
+      <div class="kpi-sub" id="kpiRegionalSub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiRegionalBar" style="background:var(--regional); width:0%"></div></div>
+    </div>
+
+    <div class="card kpi-card kpi-six c-accent">
+      <div class="card-title">Total deuda sin cheques en cartera</div>
+      <div class="kpi-value" id="kpiTotal">&mdash;</div>
+      <div class="kpi-sub" id="kpiTotalSub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiTotalBar" style="background:var(--accent); width:100%"></div></div>
+    </div>
+
+    <div class="card kpi-card kpi-six c-ok">
+      <div class="card-title">Facturas en ruta</div>
+      <div class="kpi-value" id="kpiRuta">&mdash;</div>
+      <div class="kpi-sub" id="kpiRutaSub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" id="kpiRutaBar" style="background:var(--ok); width:0%"></div></div>
+    </div>
+
+    <div class="card kpi-card kpi-six">
+      <div class="card-title">Deuda total + cheques en cartera</div>
+      <div class="kpi-value" id="kpiCount" style="color:var(--ink);">&mdash;</div>
+      <div class="kpi-sub" id="kpiCountSub">&mdash;</div>
+      <div class="kpi-bar"><div class="kpi-bar-fill" style="background:var(--ink-faint); width:100%"></div></div>
+    </div>
+
+    <div class="card chart-card-cadena">
+      <div class="card-title">Distribución por cadena</div>
+      <div class="card-sub" id="cadenaChartSub">Saldo documento, participación %</div>
+      <div class="chip-row" id="cadenaChips" style="margin-bottom:10px;"></div>
+      <div class="canvas-wrap" style="height:340px;"><canvas id="chartCadena"></canvas></div>
+    </div>
+
+    <div class="card chart-card-vendedor">
+      <div id="vendedorPanel">
+        <div class="card-title">Ranking por vendedor</div>
+        <div class="card-sub">Top 12 &middot; suma SALDO_VENC &middot; click filtra solo la tabla de detalle abajo</div>
+        <div class="barlist" id="vendedorBars"></div>
+      </div>
+      <div id="cadenaBreakdownPanel" style="display:none;">
+        <div class="card-title">Deuda por cadena</div>
+        <div class="card-sub">Desglose TREBOL / LILY / ELTIT / SUPER 9 &middot; click filtra solo la tabla de detalle abajo</div>
+        <table class="matrix-table" style="width:100%;">
+          <thead>
+            <tr><th class="row-head">Cadena</th><th>Facturas</th><th>Saldo Vencido</th><th>% del Total</th><th>Deuda Total</th></tr>
+          </thead>
+          <tbody id="cadenaBreakdownBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card table-card" id="avancePagoPanel" style="display:none;">
+      <div class="card-title">Avance de pago &middot; Cierre histórico vs. Deuda Actual</div>
+      <div class="card-sub" id="avancePagoSub">Comparación entre el cierre de abril (ancla) y la deuda más reciente registrada</div>
+      <div class="table-wrap" style="max-height:none;">
+        <table class="matrix-table" style="width:100%;">
+          <thead id="avancePagoThead"></thead>
+          <tbody id="avancePagoTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card table-card" id="comunaBreakdownPanel" style="display:none;">
+      <div class="card-title" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+        Deuda por comuna
+        <span id="comunaCadenaBadge" style="display:none;"></span>
+      </div>
+      <div class="card-sub" id="comunaBreakdownSub">Solo visible con el filtro CREDITO ACS activo &middot; suma SALDO_VENC / SALDO_DOCU</div>
+      <div class="table-wrap" style="max-height:400px;">
+        <table class="matrix-table" style="width:100%;">
+          <thead>
+            <tr><th class="row-head">Comuna</th><th>Facturas</th><th>Saldo Vencido</th><th>% del Total</th><th>Deuda Total</th></tr>
+          </thead>
+          <tbody id="comunaBreakdownBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="card-title">Detalle de facturas</div>
+      <div class="card-sub">Respeta todos los filtros activos. Busca por cliente, entidad o número · click en un cliente para ver todas sus facturas.</div>
+      <div id="detailActiveFilters" style="display:none; margin-bottom:12px; flex-wrap:wrap; gap:6px; align-items:center;"></div>
+      <div class="controls">
+        <input type="text" id="searchBox" placeholder="Buscar entidad, nombre o número...">
+        <span id="cadenaDetailBtns" style="display:none; gap:10px;">
+          <button class="cadena-detail-btn" data-cadena="TREBOL" style="background:#107c10;">&#128717; Detalle TREBOL</button>
+          <button class="cadena-detail-btn" data-cadena="LILY" style="background:#2266d3;">&#128717; Detalle LILY</button>
+          <button class="cadena-detail-btn" data-cadena="ELTIT" style="background:#d13438;">&#128717; Detalle ELTIT</button>
+          <button class="cadena-detail-btn" data-cadena="SUPER 9" style="background:#8b5cf6;">&#128717; Detalle SUPER 9</button>
+        </span>
+      </div>
+      <div class="table-wrap">
+        <table id="detailTable">
+          <thead>
+            <tr>
+              <th style="width:4px; padding:0; cursor:default;"></th>
+              <th data-key="NOMBRE_ENT">Cliente</th>
+              <th data-key="COMUNA">Comuna</th>
+              <th data-key="VENDEDOR">Vendedor</th>
+              <th data-key="NUMERO">N&deg; Doc</th>
+              <th data-key="EMISION">Emisión</th>
+              <th data-key="PRI_VENCIM">Vencimiento</th>
+              <th data-key="DIAS_MOR" class="num">Días</th>
+              <th data-key="TOTAL" class="num">Total</th>
+              <th data-key="SALDO_VENC" class="num">Saldo Venc.</th>
+              <th data-key="MOROSIDAD">Morosidad</th>
+              <th data-key="CONDICION">Condición de pago</th>
+              <th data-key="CADENA">Cadena</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card table-card">
+      <div class="card-title">Histórico de cierres</div>
+      <div class="card-sub">Evolución de deuda por condición de pago, con variación % respecto al período anterior</div>
+      <div class="table-wrap" style="max-height:none;">
+        <table class="matrix-table" id="historicoTable" style="width:100%;">
+          <thead id="historicoThead"></thead>
+          <tbody id="historicoTbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span id="rowCount">&mdash;</span>
+    <span>Random ERP &middot; Consulta FCV pendientes/parciales</span>
+  </footer>
+
+  <div class="modal-overlay" id="cadenaModalOverlay">
+    <div class="modal-box">
+      <div class="modal-header" id="cadenaModalHeader">
+        <h3 id="cadenaModalTitle">Detalle</h3>
+        <button class="modal-close" id="cadenaModalClose">&times;</button>
+      </div>
+      <div class="modal-sub" id="cadenaModalSub"></div>
+      <div class="modal-body" id="cadenaModalBody"></div>
+      <div class="modal-total" id="cadenaModalTotal"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="facturaModalOverlay" style="z-index:110;">
+    <div class="modal-box" style="max-width:920px;">
+      <div class="modal-header" id="facturaModalHeader">
+        <h3 id="facturaModalTitle">Facturas</h3>
+        <button class="modal-close" id="facturaModalClose">&times;</button>
+      </div>
+      <div class="modal-sub" id="facturaModalSub"></div>
+      <div class="modal-select-bar" id="facturaModalSelectBar" style="display:none;">
+        <span id="facturaSelectCount">0 facturas seleccionadas</span>
+        <span id="facturaSelectAvg" class="dias-badge" style="background:var(--accent); color:#fff;"></span>
+        <button class="reset-btn" id="facturaSelectClear" style="padding:4px 12px; font-size:11.5px;">Limpiar selección</button>
+      </div>
+      <div class="modal-body" id="facturaModalBody" style="padding:0 20px 20px;">
+        <table class="matrix-table" style="width:100%;">
+          <thead>
+            <tr>
+              <th style="width:30px;"><input type="checkbox" id="facturaSelectAll" title="Seleccionar todas"></th>
+              <th class="row-head">N&deg; Doc</th>
+              <th>Emisión</th>
+              <th>Días</th>
+              <th>Total</th>
+              <th>Saldo Venc.</th>
+            </tr>
+          </thead>
+          <tbody id="facturaModalTbody"></tbody>
+        </table>
+      </div>
+      <div class="modal-total" id="facturaModalTotal"></div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="chequeDetailModalOverlay" style="z-index:120;">
+    <div class="modal-box" style="max-width:1280px;">
+      <div class="modal-header" id="chequeDetailModalHeader" style="background:var(--accent);">
+        <h3 id="chequeDetailModalTitle">Detalle de cheques y documentos</h3>
+        <button class="modal-close" id="chequeDetailModalClose">&times;</button>
+      </div>
+      <div class="modal-sub" id="chequeDetailModalSub"></div>
+      <div class="modal-body" id="chequeDetailModalBody" style="padding:0 20px 20px;">
+        <div class="table-wrap" style="max-height:65vh;">
+          <table class="matrix-table" style="width:100%;">
+            <thead>
+              <tr>
+                <th>Emisión</th>
+                <th>Vencimiento</th>
+                <th>Monto</th>
+                <th class="row-head">Cliente</th>
+                <th class="row-head">Sucursal</th>
+                <th class="row-head">Vendedor</th>
+                <th class="row-head">Dirección</th>
+                <th class="row-head">Comuna</th>
+                <th class="row-head">Categoría</th>
+                <th class="row-head">Condición</th>
+              </tr>
+            </thead>
+            <tbody id="chequeDetailTbody"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-total" id="chequeDetailModalTotal"></div>
+    </div>
+  </div>
+
+<script>
+/* ============================================================
+   DATA & GLOBAL FILTER STATE
+   activeFilters: { DIMENSION: Set(values) }
+   A record passes if, for every dimension with an active filter,
+   its value is included in that filter's set (AND across dims,
+   OR within a dim's set) — same semantics as Power BI slicers.
+   ============================================================ */
+let DATA = [];
+let activeFilters = {};   // e.g. { CADENA: Set{'LILY'}, VENDEDOR: Set{'ACS'} }
+let sortState = {key:'DIAS_MOR', dir:'desc'};
+let chartInstances = {};
+
+const CADENA_COLOR = {LILY:'#2266d3', ELTIT:'#d13438', TREBOL:'#107c10', 'SUPER 9':'#8b5cf6', COBERTURA:'#f2a900'};
+
+Chart.register(ChartDataLabels);
+Chart.defaults.font.family = "'Segoe UI', 'Inter', sans-serif";
+Chart.defaults.color = '#605e5c';
+
+const SHEET_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=0&single=true&output=csv';
+const HISTORICO_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=179707393&single=true&output=csv';
+const CHEQUES_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=1972109013&single=true&output=csv';
+const ACTUALIZACION_CSV_URL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTZv1MRU94SlBqHDGifdjPZ_UV4hAp1Xezn1eESu0xottRM6QLu5oTCLla-gXgYhvUiTSZ4Q9lmog6s/pub?gid=785918253&single=true&output=csv';
+
+/* Parser CSV simple pero robusto: respeta comillas, comas dentro de comillas,
+   y comillas escapadas ("") dentro de un campo entrecomillado. */
+function parseCSV(text){
+  const rows = [];
+  let row = [];
+  let field = '';
+  let inQuotes = false;
+  for(let i=0; i<text.length; i++){
+    const c = text[i];
+    if(inQuotes){
+      if(c === '"'){
+        if(text[i+1] === '"'){ field += '"'; i++; }
+        else { inQuotes = false; }
+      } else {
+        field += c;
+      }
+    } else {
+      if(c === '"'){ inQuotes = true; }
+      else if(c === ','){ row.push(field); field=''; }
+      else if(c === '\r'){ /* skip */ }
+      else if(c === '\n'){ row.push(field); rows.push(row); row=[]; field=''; }
+      else { field += c; }
+    }
+  }
+  if(field.length || row.length){ row.push(field); rows.push(row); }
+  return rows.filter(r => r.length>1 || (r.length===1 && r[0]!==''));
+}
+
+/* '24-02-2026' -> '2026-02-24' (ISO), para que el ordenamiento de fechas como texto siga funcionando */
+function ddmmyyyyToISO(s){
+  if(!s) return '';
+  const parts = String(s).trim().split('-');
+  if(parts.length !== 3) return s;
+  const [d,m,y] = parts;
+  return `${y}-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
+}
+
+/* '744,702.00' -> 744702 (numero). Quita comas de miles y castea. */
+function parseMoneyField(s){
+  if(s === undefined || s === null || s === '') return 0;
+  const cleaned = String(s).replace(/,/g, '').trim();
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+function csvToRecords(csvText){
+  const rows = parseCSV(csvText);
+  const headers = rows[0].map(h=>String(h).replace(/^\uFEFF/, '').trim());
+  const numericCols = new Set(['DIAS_MOR','TOTAL','SALDO_DOCU','SALDO_VENC','NUMERO']);
+  return rows.slice(1).map(r=>{
+    const rec = {};
+    headers.forEach((h,i)=>{
+      let v = r[i] !== undefined ? r[i] : '';
+      if(h === 'EMISION' || h === 'PRI_VENCIM'){
+        rec[h] = ddmmyyyyToISO(v);
+      } else if(numericCols.has(h)){
+        rec[h] = parseMoneyField(v);
+      } else {
+        rec[h] = v;
+      }
+    });
+    return rec;
+  });
+}
+
+function normalizeChequeHeader(h){
+  const raw = String(h || '').trim().toUpperCase();
+  const normalized = raw.normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/\s+/g,'_');
+  if(normalized.startsWith('VENCIM')) return 'VENCIMIENTO';
+  if(normalized === 'MONTO_CHEQUE' || normalized === 'MONTO_CHEQ') return 'MONTO_CHEQ';
+  return normalized;
+}
+
+function csvToCheques(csvText){
+  const rows = parseCSV(csvText);
+  if(!rows.length) return [];
+  const headers = rows[0].map(normalizeChequeHeader);
+  return rows.slice(1).map(r=>{
+    const rec = {};
+    headers.forEach((h,i)=>{
+      const v = r[i] !== undefined ? r[i] : '';
+      if(h === 'EMISION' || h === 'VENCIMIENTO') rec[h] = ddmmyyyyToISO(v);
+      else if(h === 'MONTO_CHEQ') rec[h] = parseMoneyField(v);
+      else rec[h] = String(v).trim();
+    });
+    return rec;
+  }).filter(r=>r.EMISION || r.VENCIMIENTO || r.MONTO_CHEQ || r.CLIENTE || r.SUCURSAL);
+}
+
+function parsePercentField(s){
+  if(s === undefined || s === null || s === '') return 0;
+  const cleaned = String(s).replace('%','').trim();
+  const n = parseFloat(cleaned);
+  return isNaN(n) ? 0 : n;
+}
+
+/* La hoja de historico repite la columna 'VAR' varias veces (una por cada
+   condicion de pago). Cada 'VAR' se renombra segun la columna que la precede,
+   para poder distinguirlas: VAR_CREDITO ACS, VAR_TOTAL CHEQUES, etc. */
+function csvToHistorico(csvText){
+  const rows = parseCSV(csvText);
+  const rawHeaders = rows[0].map(h=>String(h).replace(/^\uFEFF/, '').replace(/\s+/g,' ').trim().toUpperCase());
+
+  const headers = [];
+  for(let i=0; i<rawHeaders.length; i++){
+    if(rawHeaders[i] === 'VAR'){
+      headers.push('VAR_' + headers[i-1]);
+    } else {
+      headers.push(rawHeaders[i]);
+    }
+  }
+
+  const moneyCols = new Set(['CREDITO ACS','TOTAL CHEQUES','CREDITO DE CONFIANZA','CONTADO','FUNCIONARIO HAMBURGO','AÑADIR CONDICION','DEU-BAGLEY','TOTAL DEUDA','DEUDA AMAR','DEUDA LILY','DEUDA ELTIT','DEUDA SUPER 9','DIFERENCIA']);
+
+  return rows.slice(1).map(r=>{
+    const rec = {};
+    headers.forEach((h,i)=>{
+      let v = r[i] !== undefined ? r[i] : '';
+      if(h === 'FECHA'){
+        rec[h] = ddmmyyyyToISO(v);
+      } else if(h.startsWith('VAR_')){
+        rec[h] = parsePercentField(v);
+      } else if(moneyCols.has(h)){
+        rec[h] = parseMoneyField(v);
+      } else {
+        rec[h] = String(v).trim();
+      }
+    });
+    return rec;
+  });
+}
+
+let HISTORICO = [];
+let CHEQUES = [];
+let CHEQUES_LOAD_ERROR = false;
+
+function fetchTextChecked(url, label){
+  const freshUrl = url + (url.includes('?') ? '&' : '?') + '_actualizado=' + Date.now();
+  return fetch(freshUrl, {cache:'no-store'}).then(r=>{
+    if(!r.ok) throw new Error(`${label}: HTTP ${r.status}`);
+    return r.text();
+  });
+}
+
+Promise.all([
+  fetchTextChecked(SHEET_CSV_URL, 'Deuda'),
+  fetchTextChecked(HISTORICO_CSV_URL, 'Histórico').catch(err => {
+    console.error('Error cargando historico:', err);
+    return null;
+  }),
+  fetchTextChecked(CHEQUES_CSV_URL, 'Cheques').catch(err => {
+    console.error('Error cargando cheques:', err);
+    CHEQUES_LOAD_ERROR = true;
+    return null;
+  }),
+  fetchTextChecked(ACTUALIZACION_CSV_URL, 'Fecha actualización').catch(err => {
+    console.error('Error cargando fecha de actualización:', err);
+    return null;
+  })
+]).then(([csvText, historicoText, chequesText, actualizacionText]) => {
+  DATA = csvToRecords(csvText);
+  if(historicoText) HISTORICO = csvToHistorico(historicoText);
+  if(chequesText) CHEQUES = csvToCheques(chequesText);
+  if(actualizacionText){
+    const rowsFecha = parseCSV(actualizacionText.replace(/^\uFEFF/, ''));
+    const valorA1 = rowsFecha.length && rowsFecha[0].length ? String(rowsFecha[0][0] || '').trim() : '';
+    if(valorA1) document.getElementById('titleUpdate').textContent = `Actualizado: ${valorA1}`;
+  }
+  init();
+  hideLoadingOverlay();
+}).catch(err => {
+  console.error('Error cargando datos desde Google Sheets:', err);
+  document.getElementById('metaInfo').textContent = 'Error cargando datos. Revisa la consola.';
+  showLoadingError();
+});
+
+function hideLoadingOverlay(){
+  const overlay = document.getElementById('loadingOverlay');
+  if(overlay) overlay.classList.add('hide');
+}
+
+function showLoadingError(){
+  const box = document.querySelector('.loading-box');
+  if(!box) return;
+  box.innerHTML = `
+    <div style="font-size:32px;">&#9888;</div>
+    <div class="loading-text" style="color:var(--danger);">No se pudieron cargar los datos</div>
+    <div class="loading-sub">Revisa tu conexión o vuelve a intentarlo más tarde.</div>
+  `;
+}
+
+function money(n){
+  return '$' + Math.round(n).toLocaleString('es-CL');
+}
+function escapeHTML(value){
+  return String(value ?? '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;')
+    .replace(/'/g,'&#39;');
+}
+function fechaDMA(iso){
+  if(!iso) return '';
+  const [y,m,d] = String(iso).split('-');
+  if(!y || !m || !d) return iso;
+  return `${d}-${m}-${y}`;
+}
+function moneyShort(n){
+  return '$' + (n/1e6).toFixed(1) + 'M';
+}
+
+function init(){
+  buildCadenaChips();
+  buildCadenaChart();
+  buildVendedorBars();
+  buildMatrixTable();
+  buildHistoricoTable();
+  renderChequeSummary();
+  renderAll();
+
+  document.getElementById('searchBox').addEventListener('input', renderTableOnly);
+  document.getElementById('resetBtn').addEventListener('click', clearAllFilters);
+
+  document.querySelectorAll('.cadena-detail-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=> openCadenaModal(btn.dataset.cadena));
+  });
+  document.getElementById('cadenaModalClose').addEventListener('click', closeCadenaModal);
+  document.getElementById('cadenaModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'cadenaModalOverlay') closeCadenaModal();
+  });
+  document.getElementById('facturaModalClose').addEventListener('click', closeFacturaModal);
+  document.getElementById('facturaModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'facturaModalOverlay') closeFacturaModal();
+  });
+  document.getElementById('chequeDetailBtn').addEventListener('click', openChequeDetailModal);
+  document.getElementById('chequeDetailModalClose').addEventListener('click', closeChequeDetailModal);
+  document.getElementById('chequeDetailModalOverlay').addEventListener('click', (e)=>{
+    if(e.target.id === 'chequeDetailModalOverlay') closeChequeDetailModal();
+  });
+
+  document.querySelectorAll('#detailTable thead th').forEach(th=>{
+    if(!th.dataset.key) return;
+    th.addEventListener('click', ()=>{
+      const key = th.dataset.key;
+      if(sortState.key === key){ sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc'; }
+      else { sortState.key = key; sortState.dir = 'desc'; }
+      updateSortArrows();
+      renderTableOnly();
+    });
+  });
+  updateSortArrows();
+}
+
+function updateSortArrows(){
+  document.querySelectorAll('#detailTable thead th[data-key]').forEach(th=>{
+    const existing = th.querySelector('.sort-arrow');
+    if(existing) existing.remove();
+    if(th.dataset.key === sortState.key){
+      const arrow = document.createElement('span');
+      arrow.className = 'sort-arrow';
+      arrow.textContent = sortState.dir === 'desc' ? '\u25BC' : '\u25B2';
+      th.appendChild(arrow);
+    }
+  });
+}
+
+/* ===== Filter engine ===== */
+function toggleFilter(dimension, value){
+  if(!activeFilters[dimension]) activeFilters[dimension] = new Set();
+  const set = activeFilters[dimension];
+  if(set.has(value)){ set.delete(value); if(set.size===0) delete activeFilters[dimension]; }
+  else { set.add(value); }
+  applyImplicitCadenaRule();
+  renderAll();
+}
+
+function clearFilter(dimension){
+  delete activeFilters[dimension];
+  renderAll();
+}
+
+function toggleMatrixCell(morosidad, condicion){
+  const yaSeleccionada =
+    activeFilters.MOROSIDAD && activeFilters.MOROSIDAD.has(morosidad) && activeFilters.MOROSIDAD.size===1 &&
+    activeFilters.CONDICION2 && activeFilters.CONDICION2.has(condicion) && activeFilters.CONDICION2.size===1;
+
+  if(yaSeleccionada){
+    delete activeFilters.MOROSIDAD;
+    delete activeFilters.CONDICION2;
+  } else {
+    activeFilters.MOROSIDAD = new Set([morosidad]);
+    activeFilters.CONDICION2 = new Set([condicion]);
+  }
+  applyImplicitCadenaRule();
+  renderAll();
+}
+
+/* CREDITO ACS es una condicion de pago exclusiva de SUPERMERCADO REGIONAL:
+   si CONDICION2 queda con ese valor activo, forzamos el chip de cadena
+   correspondiente (reemplazando cualquier otro chip de cadena previo). */
+function applyImplicitCadenaRule(){
+  if(activeFilters.CONDICION2 && activeFilters.CONDICION2.has('CREDITO ACS')){
+    if(cadenaChipFilter !== GRUPO_REGIONAL){
+      cadenaChipFilter = GRUPO_REGIONAL;
+      tableOnlyCadenaFilter = '';
+      buildCadenaChips();
+    }
+  }
+}
+
+function clearAllFilters(){
+  activeFilters = {};
+  cadenaChipFilter = '';
+  tableOnlyCadenaFilter = '';
+  tableOnlyVendedorFilter = '';
+  tableOnlyComunaFilter = '';
+  tableOnlyClienteFilter = '';
+  regionalExpanded = false;
+  buildCadenaChips();
+  renderAll();
+}
+
+function getFilteredData(excludeDimension){
+  return DATA.filter(r=>{
+    // Cadena chip filter (always applied, it's not part of activeFilters cross-filter set)
+    if(cadenaChipFilter){
+      if(cadenaChipFilter === GRUPO_REGIONAL){
+        if(!CADENAS_REGIONAL.includes(r.CADENA)) return false;
+      } else if(cadenaChipFilter === CONDICION_DEU_BAGLEY){
+        if(!esDeuBagley(r)) return false;
+      } else if(cadenaChipFilter === 'COBERTURA'){
+        if(r.CADENA !== 'COBERTURA' || esDeuBagley(r)) return false;
+      } else if(r.CADENA !== cadenaChipFilter){
+        return false;
+      }
+    }
+    for(const dim in activeFilters){
+      if(dim === excludeDimension) continue;
+      if(!activeFilters[dim].has(r[dim])) return false;
+    }
+    return true;
+  });
+}
+
+function hasAnyFilter(){
+  return Object.keys(activeFilters).length > 0 || cadenaChipFilter !== '' || tableOnlyCadenaFilter || tableOnlyVendedorFilter || tableOnlyComunaFilter || tableOnlyClienteFilter;
+}
+
+/* ===== Master render: everything reacts to activeFilters ===== */
+function renderAll(){
+  const filtered = getFilteredData();
+
+  updateResetButton();
+  updateFilterStrip();
+  updateKPIs(filtered);
+  updateCadenaChart();
+  updateVendedorOrCadenaPanel();
+  updateMatrixTable();
+  buildAvancePagoTable();
+  updateComunaBreakdown(filtered);
+  updateCadenaDetailBtns();
+  renderTable(filtered);
+
+  document.getElementById('metaInfo').textContent =
+    `${DATA.length} facturas total \u00b7 ${new Date().toLocaleDateString('es-CL')}`;
+}
+
+function updateResetButton(){
+  document.getElementById('resetBtn').disabled = !hasAnyFilter();
+}
+
+const DIM_LABELS = {CADENA:'Cadena', VENDEDOR:'Vendedor', MOROSIDAD:'Morosidad', CONDICION2:'Condición'};
+
+function updateFilterStrip(){
+  const strip = document.getElementById('filterStrip');
+  const row = document.getElementById('activeChipsRow');
+  const anyLocal = tableOnlyCadenaFilter || tableOnlyVendedorFilter || tableOnlyComunaFilter || tableOnlyClienteFilter;
+  if(!hasAnyFilter() && !anyLocal){ strip.classList.remove('show'); row.innerHTML=''; return; }
+  strip.classList.add('show');
+
+  let html = '';
+  if(cadenaChipFilter){
+    html += `<span class="active-filter-chip">Cadena: ${cadenaChipFilter}<span class="x" data-dim="__cadena">&times;</span></span>`;
+  }
+  for(const dim in activeFilters){
+    const values = [...activeFilters[dim]];
+    html += `<span class="active-filter-chip">${DIM_LABELS[dim]||dim}: ${values.join(', ')}<span class="x" data-dim="${dim}">&times;</span></span>`;
+  }
+  if(tableOnlyCadenaFilter){
+    html += `<span class="active-filter-chip" style="background:var(--ink-dim);">Tabla &middot; Cadena: ${tableOnlyCadenaFilter}<span class="x" data-dim="__tablecadena">&times;</span></span>`;
+  }
+  if(tableOnlyVendedorFilter){
+    html += `<span class="active-filter-chip" style="background:var(--ink-dim);">Tabla &middot; Vendedor: ${tableOnlyVendedorFilter}<span class="x" data-dim="__tablevendedor">&times;</span></span>`;
+  }
+  if(tableOnlyClienteFilter){
+    html += `<span class="active-filter-chip" style="background:var(--ink-dim);">Tabla &middot; Cliente: ${escapeHTML(tableOnlyClienteFilter)}<span class="x" data-dim="__tablecliente">&times;</span></span>`;
+  }
+  html += `<button class="reset-btn" id="resetBtnInline" style="margin-left:auto;">&#8635; Borrar todos los filtros</button>`;
+  row.innerHTML = html;
+  row.querySelectorAll('.x').forEach(x=>{
+    x.addEventListener('click', ()=>{
+      if(x.dataset.dim === '__cadena'){
+        cadenaChipFilter = '';
+        regionalExpanded = false;
+        buildCadenaChips();
+        renderAll();
+      } else if(x.dataset.dim === '__tablecadena'){
+        tableOnlyCadenaFilter = '';
+        updateCadenaBreakdown();
+        renderAll();
+      } else if(x.dataset.dim === '__tablevendedor'){
+        tableOnlyVendedorFilter = '';
+        updateVendedorBars();
+        renderAll();
+      } else if(x.dataset.dim === '__tablecliente'){
+        tableOnlyClienteFilter = '';
+        renderAll();
+      } else {
+        clearFilter(x.dataset.dim);
+      }
+    });
+  });
+  document.getElementById('resetBtnInline').addEventListener('click', clearAllFilters);
+}
+
+function updateDetailActiveFilters(){
+  const container = document.getElementById('detailActiveFilters');
+  const chips = [];
+
+  if(cadenaChipFilter){
+    chips.push(`<span class="active-filter-chip" style="background:var(--accent); padding:4px 10px;">Cadena: ${cadenaChipFilter}</span>`);
+  }
+  for(const dim in activeFilters){
+    const values = [...activeFilters[dim]];
+    chips.push(`<span class="active-filter-chip" style="padding:4px 10px;">${DIM_LABELS[dim]||dim}: ${values.join(', ')}</span>`);
+  }
+  if(tableOnlyCadenaFilter){
+    const color = CADENA_COLOR[tableOnlyCadenaFilter] || 'var(--ink-dim)';
+    chips.push(`<span class="active-filter-chip" style="background:${color}; padding:4px 10px;">Cadena (tabla): ${tableOnlyCadenaFilter}</span>`);
+  }
+  if(tableOnlyVendedorFilter){
+    chips.push(`<span class="active-filter-chip" style="background:var(--ink-dim); padding:4px 10px;">Vendedor (tabla): ${tableOnlyVendedorFilter}</span>`);
+  }
+  if(tableOnlyComunaFilter){
+    chips.push(`<span class="active-filter-chip" style="background:var(--ink-dim); padding:4px 10px;">Comuna (tabla): ${tableOnlyComunaFilter}</span>`);
+  }
+  if(tableOnlyClienteFilter){
+    chips.push(`<span class="active-filter-chip" style="background:var(--ink-dim); padding:4px 10px;">Cliente (tabla): ${escapeHTML(tableOnlyClienteFilter)}</span>`);
+  }
+
+  if(chips.length === 0){
+    container.style.display = 'none';
+    container.innerHTML = '';
+    return;
+  }
+  container.style.display = 'flex';
+  container.innerHTML = `<span style="font-size:11px; font-weight:600; color:var(--ink-faint); text-transform:uppercase;">Filtrando por:</span>` + chips.join('');
+}
+
+/* ===== Resumen de cheques / documentos complementarios ===== */
+function dateFromISO(iso){
+  if(!iso) return null;
+  const parts = String(iso).split('-').map(Number);
+  if(parts.length !== 3 || !parts[0] || !parts[1] || !parts[2]) return null;
+  const d = new Date(parts[0], parts[1]-1, parts[2]);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+function chequeConditionStatus(rows, today){
+  const validDates = rows.map(r=>dateFromISO(r.VENCIMIENTO)).filter(Boolean).sort((a,b)=>a-b);
+  if(!validDates.length) return {label:'Sin fecha', cls:'warn'};
+  const hasOverdue = validDates.some(d=>d < today);
+  if(hasOverdue) return {label:'Con vencidos', cls:'danger'};
+  const in7 = validDates.some(d=>{
+    const days = Math.floor((d - today) / 86400000);
+    return days >= 0 && days <= 7;
+  });
+  if(in7) return {label:'Próximo', cls:'warn'};
+  return {label:'Al día', cls:'ok'};
+}
+
+function renderChequeSummary(){
+  const detailBtn = document.getElementById('chequeDetailBtn');
+  if(!detailBtn) return;
+
+  if(CHEQUES_LOAD_ERROR){
+    document.getElementById('chequeSummarySub').textContent = 'No se pudo cargar la hoja complementaria. El resto del dashboard sigue disponible.';
+    ['chequeMontoTotal','chequeCantidad'].forEach(id=>document.getElementById(id).textContent='—');
+    ['chequeMontoTotalSub','chequeCantidadSub'].forEach(id=>document.getElementById(id).textContent='sin datos');
+    detailBtn.disabled = true;
+    return;
+  }
+
+  const total = CHEQUES.reduce((a,r)=>a + Number(r.MONTO_CHEQ || 0), 0);
+  const clientes = new Set(CHEQUES.map(r=>r.CLIENTE).filter(Boolean)).size;
+  const fechas = CHEQUES.map(r=>r.VENCIMIENTO).filter(Boolean).sort();
+  const rango = fechas.length ? `${fechaDMA(fechas[0])} a ${fechaDMA(fechas[fechas.length-1])}` : 'sin fechas de vencimiento';
+
+  document.getElementById('chequeMontoTotal').textContent = money(total);
+  document.getElementById('chequeMontoTotalSub').textContent = `${clientes.toLocaleString('es-CL')} clientes`;
+  document.getElementById('chequeCantidad').textContent = CHEQUES.length.toLocaleString('es-CL');
+  document.getElementById('chequeCantidadSub').textContent = `${fechas.length ? 'vencimientos ' + rango : 'sin vencimientos informados'}`;
+  document.getElementById('chequeSummarySub').textContent = `Hoja complementaria · ${CHEQUES.length} documentos`;
+  detailBtn.disabled = !CHEQUES.length;
+}
+
+function openChequeDetailModal(){
+  if(CHEQUES_LOAD_ERROR || !CHEQUES.length) return;
+
+  const rows = [...CHEQUES].sort((a,b)=>{
+    const av = a.VENCIMIENTO || '9999-99-99';
+    const bv = b.VENCIMIENTO || '9999-99-99';
+    if(av !== bv) return av.localeCompare(bv);
+    return Number(b.MONTO_CHEQ||0) - Number(a.MONTO_CHEQ||0);
+  });
+
+  document.getElementById('chequeDetailModalSub').textContent = `${rows.length} documento${rows.length===1?'':'s'} registrados`;
+  document.getElementById('chequeDetailTbody').innerHTML = rows.map(r=>`
+    <tr>
+      <td>${r.EMISION ? fechaDMA(r.EMISION) : '—'}</td>
+      <td>${r.VENCIMIENTO ? fechaDMA(r.VENCIMIENTO) : '—'}</td>
+      <td class="num">${money(r.MONTO_CHEQ || 0)}</td>
+      <td class="row-head">${escapeHTML(r.CLIENTE || '—')}</td>
+      <td class="row-head">${escapeHTML(r.SUCURSAL || '—')}</td>
+      <td class="row-head">${escapeHTML(r.VENDEDOR || '—')}</td>
+      <td class="row-head">${escapeHTML(r.DIRECCION || '—')}</td>
+      <td class="row-head">${escapeHTML(r.COMUNA || '—')}</td>
+      <td class="row-head">${escapeHTML(r.CATEGORIA || '—')}</td>
+      <td class="row-head">${escapeHTML(r.CONDICION || '—')}</td>
+    </tr>`).join('');
+
+  const total = rows.reduce((a,r)=>a + Number(r.MONTO_CHEQ || 0), 0);
+  const clientes = new Set(rows.map(r=>r.CLIENTE).filter(Boolean)).size;
+  document.getElementById('chequeDetailModalTotal').innerHTML =
+    `<span>${rows.length.toLocaleString('es-CL')} documentos · ${clientes.toLocaleString('es-CL')} clientes</span><span>Total ${money(total)}</span>`;
+
+  document.getElementById('chequeDetailModalOverlay').classList.add('show');
+}
+
+function closeChequeDetailModal(){
+  document.getElementById('chequeDetailModalOverlay').classList.remove('show');
+}
+
+/* ===== KPIs ===== */
+function updateKPIs(filtered){
+  const totalDocu = filtered.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  const enRuta = filtered.filter(r=>r.MOROSIDAD==='FACTURA EN RUTA');
+  const totalRuta = enRuta.reduce((a,r)=>a+Number(r.SALDO_VENC||0),0);
+  const chequeTotal = CHEQUES_LOAD_ERROR ? 0 : CHEQUES.reduce((a,r)=>a+Number(r.MONTO_CHEQ||0),0);
+
+  // Las tres métricas de composición ignoran únicamente el chip de cadena para
+  // que siempre sea posible comparar DEU-BAGLEY, COBERTURA y REGIONAL entre sí.
+  // Los demás filtros activos (morosidad, condición, vendedor, etc.) sí se respetan.
+  const compositionBase = DATA.filter(r=>{
+    for(const dim in activeFilters){
+      if(!activeFilters[dim].has(r[dim])) return false;
+    }
+    return true;
+  });
+  const deuBagleyRows = compositionBase.filter(esDeuBagley);
+  const coberturaRows = compositionBase.filter(r=>r.CADENA==='COBERTURA' && !esDeuBagley(r));
+  const regionalRows = compositionBase.filter(r=>CADENAS_REGIONAL.includes(r.CADENA));
+
+  const deuBagleyTotal = deuBagleyRows.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  const coberturaTotal = coberturaRows.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  const regionalTotal = regionalRows.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  const compositionTotal = compositionBase.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0) || 1;
+
+  document.getElementById('kpiDeuBagley').textContent = money(deuBagleyTotal);
+  document.getElementById('kpiDeuBagleySub').textContent = `${deuBagleyRows.length} factura${deuBagleyRows.length===1?'':'s'} · sin cheques`;
+  document.getElementById('kpiDeuBagleyBar').style.width = Math.min(100, deuBagleyTotal/compositionTotal*100)+'%';
+
+  document.getElementById('kpiCobertura').textContent = money(coberturaTotal);
+  document.getElementById('kpiCoberturaSub').textContent = `${coberturaRows.length} factura${coberturaRows.length===1?'':'s'} · sin DEU-BAGLEY ni cheques`;
+  document.getElementById('kpiCoberturaBar').style.width = Math.min(100, coberturaTotal/compositionTotal*100)+'%';
+
+  document.getElementById('kpiRegional').textContent = money(regionalTotal);
+  document.getElementById('kpiRegionalSub').textContent = `${regionalRows.length} factura${regionalRows.length===1?'':'s'} · TREBOL / LILY / ELTIT / SUPER 9`;
+  document.getElementById('kpiRegionalBar').style.width = Math.min(100, regionalTotal/compositionTotal*100)+'%';
+
+  document.getElementById('kpiTotal').textContent = money(totalDocu);
+  document.getElementById('kpiTotalSub').textContent = filtered.length+' facturas';
+
+  document.getElementById('kpiRuta').textContent = enRuta.length+' facturas';
+  document.getElementById('kpiRutaSub').textContent = money(totalRuta);
+
+  const esRegional = cadenaChipFilter === GRUPO_REGIONAL || CADENAS_REGIONAL.includes(cadenaChipFilter);
+  const esFiltroDeuBagley = cadenaChipFilter === CONDICION_DEU_BAGLEY ||
+    (activeFilters.CONDICION2 && activeFilters.CONDICION2.has(CONDICION_DEU_BAGLEY));
+  const chequesAplicables = (esRegional || esFiltroDeuBagley) ? 0 : chequeTotal;
+  const totalConCheques = totalDocu + chequesAplicables;
+
+  document.getElementById('kpiCount').textContent = money(totalConCheques);
+  document.getElementById('kpiCountSub').textContent = CHEQUES_LOAD_ERROR
+    ? 'sin datos de cheques en cartera'
+    : (esRegional || esFiltroDeuBagley)
+      ? `${money(totalDocu)} · no incluye cheques en cartera`
+      : `${money(totalDocu)} + ${money(chequeTotal)} en cheques`;
+
+  const maxRuta = totalDocu || 1;
+  document.getElementById('kpiRutaBar').style.width = Math.min(100, totalRuta/maxRuta*100)+'%';
+}
+
+/* ===== Grouping helpers ===== */
+function groupSumBy(data, keyFn, valueKey){
+  const map = {};
+  data.forEach(r=>{
+    const k = keyFn(r) || '\u2014';
+    map[k] = (map[k]||0) + Number(r[valueKey]||0);
+  });
+  return map;
+}
+function groupCountBy(data, keyFn){
+  const map = {};
+  data.forEach(r=>{
+    const k = keyFn(r) || '\u2014';
+    map[k] = (map[k]||0) + 1;
+  });
+  return map;
+}
+
+/* ===== Cadena: chip filter (not cross-filter click) ===== */
+const CADENAS_REGIONAL = ['LILY','ELTIT','TREBOL','SUPER 9'];
+const GRUPO_REGIONAL = 'SUPERMERCADO REGIONAL';
+const CONDICION_DEU_BAGLEY = 'DEU-BAGLEY';
+let cadenaChipFilter = '';       // '', GRUPO_REGIONAL, 'COBERTURA', or a specific sub-cadena
+let tableOnlyCadenaFilter = '';  // filtro que SOLO afecta la tabla de detalle, no el resto del dashboard
+let tableOnlyVendedorFilter = ''; // idem, para el ranking de vendedor
+let tableOnlyComunaFilter = '';   // idem, para la tabla de deuda por comuna
+let tableOnlyClienteFilter = '';  // idem, al hacer click en un cliente dentro de la tabla de detalle
+let regionalExpanded = false;
+
+function cadenaGrupo(cadena){
+  return CADENAS_REGIONAL.includes(cadena) ? GRUPO_REGIONAL : cadena;
+}
+
+function esDeuBagley(r){
+  return String(r.CONDICION2 || '').trim().toUpperCase() === CONDICION_DEU_BAGLEY;
+}
+
+function distribucionCadenaGrupo(r){
+  if(esDeuBagley(r)) return CONDICION_DEU_BAGLEY;
+  return cadenaGrupo(r.CADENA);
+}
+
+function buildCadenaChips(){
+  const cadenasReales = [...new Set(DATA.map(r=>r.CADENA))];
+  const otras = cadenasReales.filter(c=>!CADENAS_REGIONAL.includes(c) && c!==CONDICION_DEU_BAGLEY).sort();
+  const tieneRegional = cadenasReales.some(c=>CADENAS_REGIONAL.includes(c));
+  const tieneDeuBagley = DATA.some(esDeuBagley);
+
+  const activeClass = (val) => cadenaChipFilter === val ? ' active' : '';
+
+  let html = `<button class="chip${activeClass('')}" data-cadena="">Todas</button>`;
+  if(tieneRegional){
+    html += `<span class="chip-group">
+      <button class="chip${activeClass(GRUPO_REGIONAL)}" data-cadena="${GRUPO_REGIONAL}">${GRUPO_REGIONAL}</button>
+      <button class="chip-expand" id="expandRegional" title="Ver desglose">&#9656;</button>
+    </span>`;
+  }
+  html += otras.map(c=>`<button class="chip${activeClass(c)}" data-cadena="${c}">${c}</button>`).join('');
+  if(tieneDeuBagley){
+    html += `<button class="chip${activeClass(CONDICION_DEU_BAGLEY)}" data-cadena="${CONDICION_DEU_BAGLEY}">${CONDICION_DEU_BAGLEY}</button>`;
+  }
+
+  document.getElementById('cadenaChips').innerHTML = html;
+  renderRegionalSubChips();
+  attachCadenaChipEvents();
+}
+
+function renderRegionalSubChips(){
+  let sub = document.getElementById('regionalSubChips');
+  if(sub) sub.remove();
+  if(!regionalExpanded) return;
+
+  const cadenasReales = [...new Set(DATA.map(r=>r.CADENA))];
+  const presentes = CADENAS_REGIONAL.filter(c=>cadenasReales.includes(c)).sort();
+
+  const div = document.createElement('div');
+  div.id = 'regionalSubChips';
+  div.className = 'sub-chip-row';
+  div.innerHTML = presentes.map(c=>`<button class="chip sub-chip${cadenaChipFilter===c?' active':''}" data-cadena="${c}">${c}</button>`).join('');
+  document.getElementById('cadenaChips').insertAdjacentElement('afterend', div);
+  attachCadenaChipEvents();
+}
+
+function attachCadenaChipEvents(){
+  document.querySelectorAll('#cadenaChips .chip, #regionalSubChips .chip').forEach(chip=>{
+    chip.onclick = ()=>{
+      document.querySelectorAll('#cadenaChips .chip, #regionalSubChips .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      cadenaChipFilter = chip.dataset.cadena;
+      tableOnlyCadenaFilter = '';
+      tableOnlyComunaFilter = '';
+      renderAll();
+    };
+  });
+  const expandBtn = document.getElementById('expandRegional');
+  if(expandBtn){
+    expandBtn.onclick = (e)=>{
+      e.stopPropagation();
+      regionalExpanded = !regionalExpanded;
+      expandBtn.innerHTML = regionalExpanded ? '&#9662;' : '&#9656;';
+      renderRegionalSubChips();
+    };
+  }
+}
+
+function getCadenaChipFilteredData(){
+  if(!cadenaChipFilter) return DATA;
+  if(cadenaChipFilter === GRUPO_REGIONAL) return DATA.filter(r=>CADENAS_REGIONAL.includes(r.CADENA));
+  if(cadenaChipFilter === CONDICION_DEU_BAGLEY) return DATA.filter(esDeuBagley);
+  if(cadenaChipFilter === 'COBERTURA') return DATA.filter(r=>r.CADENA==='COBERTURA' && !esDeuBagley(r));
+  return DATA.filter(r=>r.CADENA === cadenaChipFilter);
+}
+
+/* ===== Cadena chart (reacts to chip, not cross-filter click) ===== */
+function buildCadenaChart(){
+  chartInstances.cadena = new Chart(document.getElementById('chartCadena'), {
+    type:'doughnut',
+    data:{ labels:[], datasets:[{ data:[], backgroundColor:[], borderColor:'#fff', borderWidth:2 }] },
+    options:{
+      cutout:'58%',
+      maintainAspectRatio:false,
+      layout:{padding:0},
+      onClick:(evt, elements)=>{
+        const isChipRegional = (cadenaChipFilter === GRUPO_REGIONAL || CADENAS_REGIONAL.includes(cadenaChipFilter));
+        if(!isChipRegional || !elements.length) return;
+        const idx = elements[0].index;
+        const label = chartInstances.cadena.data.labels[idx];
+        if(!CADENAS_REGIONAL.includes(label)) return; // solo cadenas individuales, no COBERTURA/agregados
+        tableOnlyCadenaFilter = (tableOnlyCadenaFilter === label) ? '' : label;
+        updateComunaBreakdown(getFilteredData());
+        updateCadenaBreakdown();
+        renderTableOnly();
+      },
+      plugins:{
+        legend:{
+          position:'bottom',
+          align:'center',
+          labels:{boxWidth:10, padding:12, font:{size:11}}
+        },
+        tooltip:{
+          backgroundColor:'#201f1e', titleColor:'#fff', bodyColor:'#fff',
+          callbacks:{label:c=>c.label+': '+money(c.raw)}
+        },
+        datalabels:{
+          color:'#fff',
+          font:{family:"'Consolas', monospace", size:11, weight:700},
+          formatter:(v,ctx)=>{
+            const total = ctx.chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+            if(total===0) return '';
+            const pct=(v/total*100);
+            if(pct<4) return '';
+            return [(pct.toFixed(0)+'%'), moneyShort(v)];
+          },
+          textAlign:'center'
+        }
+      }
+    }
+  });
+}
+
+function updateCadenaChart(){
+  // El grafico circular es independiente de los filtros generales del dashboard.
+  // Solo usa su propio chip superior (Todas / Supermercado Regional / Cobertura).
+  const baseData = DATA.filter(r=>{
+    if(!cadenaChipFilter) return true;
+    if(cadenaChipFilter === GRUPO_REGIONAL) return CADENAS_REGIONAL.includes(r.CADENA);
+    if(cadenaChipFilter === CONDICION_DEU_BAGLEY) return esDeuBagley(r);
+    if(cadenaChipFilter === 'COBERTURA') return r.CADENA==='COBERTURA' && !esDeuBagley(r);
+    return r.CADENA === cadenaChipFilter;
+  });
+
+  const mostrandoDesglose = (cadenaChipFilter === GRUPO_REGIONAL || CADENAS_REGIONAL.includes(cadenaChipFilter));
+  const subLabel = document.getElementById('cadenaChartSub');
+  const chequeTotal = CHEQUES_LOAD_ERROR ? 0 : CHEQUES.reduce((a,r)=>a + Number(r.MONTO_CHEQ||0), 0);
+  let map, colors, subtitle = 'Saldo documento, participación %';
+
+  if(cadenaChipFilter === CONDICION_DEU_BAGLEY){
+    const deuBagleyMonto = baseData.reduce((a,r)=>a + Number(r.SALDO_DOCU||0), 0);
+    map = { [CONDICION_DEU_BAGLEY]: deuBagleyMonto };
+    colors = ['#d13438'];
+    subtitle = `Saldo documento · DEU-BAGLEY ${money(deuBagleyMonto)} · no incluye cheques en cartera`;
+  } else if(cadenaChipFilter === 'COBERTURA'){
+    const coberturaMonto = baseData.reduce((a,r)=>a + Number(r.SALDO_DOCU||0), 0);
+    map = { 'COBERTURA': coberturaMonto };
+    colors = [CADENA_COLOR.COBERTURA];
+
+    if(!CHEQUES_LOAD_ERROR && chequeTotal > 0){
+      map['CHEQUES EN CARTERA'] = chequeTotal;
+      colors.push('#6b7280');
+      const totalMix = coberturaMonto + chequeTotal;
+      const coberturaPct = totalMix > 0 ? (coberturaMonto / totalMix * 100) : 0;
+      const chequePct = totalMix > 0 ? (chequeTotal / totalMix * 100) : 0;
+      subtitle = `Saldo documento, participación % · Cobertura ${money(coberturaMonto)} (${coberturaPct.toFixed(1).replace('.',',')}%) · Cheques ${money(chequeTotal)} (${chequePct.toFixed(1).replace('.',',')}%)`;
+    } else {
+      subtitle = `Saldo documento · Cobertura ${money(coberturaMonto)}`;
+    }
+  } else if(mostrandoDesglose){
+    map = groupSumBy(baseData, r=>r.CADENA, 'SALDO_DOCU');
+    const order = ['LILY','ELTIT','TREBOL','SUPER 9','COBERTURA'].filter(k=>map[k]!==undefined);
+    map = Object.fromEntries(order.map(k=>[k,map[k]]));
+    colors = order.map(k=>CADENA_COLOR[k]);
+
+    const totalDocuBase = DATA.reduce((a,r)=>a + Number(r.SALDO_DOCU||0), 0);
+    const totalConCheques = totalDocuBase + chequeTotal;
+    const chequePct = totalConCheques > 0 ? (chequeTotal / totalConCheques * 100) : 0;
+    const chequeInfo = CHEQUES_LOAD_ERROR
+      ? 'sin datos de cheques en cartera'
+      : `cheques en cartera ${money(chequeTotal)} (${chequePct.toFixed(1).replace('.',',')}%)`;
+    subtitle = `Saldo documento, participación % · desglose por cadena · ${chequeInfo}`;
+  } else {
+    map = groupSumBy(baseData, r=>distribucionCadenaGrupo(r), 'SALDO_DOCU');
+    colors = Object.keys(map).map(k=> {
+      if(k===GRUPO_REGIONAL) return '#118dff';
+      if(k===CONDICION_DEU_BAGLEY) return '#d13438';
+      return CADENA_COLOR.COBERTURA;
+    });
+
+    const totalDocuBase = DATA.reduce((a,r)=>a + Number(r.SALDO_DOCU||0), 0);
+    const totalConCheques = totalDocuBase + chequeTotal;
+    const chequePct = totalConCheques > 0 ? (chequeTotal / totalConCheques * 100) : 0;
+    const chequeInfo = CHEQUES_LOAD_ERROR
+      ? 'sin datos de cheques en cartera'
+      : `cheques en cartera ${money(chequeTotal)} (${chequePct.toFixed(1).replace('.',',')}%)`;
+    subtitle = `Saldo documento, participación % · ${chequeInfo}`;
+  }
+
+  const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]);
+  const orderedColors = entries.map(([label])=> {
+    const idx = Object.keys(map).indexOf(label);
+    return colors[idx];
+  });
+
+  chartInstances.cadena.data.labels = entries.map(e=>e[0]);
+  chartInstances.cadena.data.datasets[0].data = entries.map(e=>e[1]);
+  chartInstances.cadena.data.datasets[0].backgroundColor = orderedColors;
+  chartInstances.cadena.update();
+  subLabel.textContent = subtitle;
+}
+
+/* ===== Vendedor bars (clickable rows) ===== */
+function buildVendedorBars(){ /* rendered fully in update */ }
+
+function updateVendedorOrCadenaPanel(){
+  const showCadenaBreakdown = (cadenaChipFilter === GRUPO_REGIONAL);
+  document.getElementById('vendedorPanel').style.display = showCadenaBreakdown ? 'none' : 'block';
+  document.getElementById('cadenaBreakdownPanel').style.display = showCadenaBreakdown ? 'block' : 'none';
+
+  if(showCadenaBreakdown) updateCadenaBreakdown();
+  else updateVendedorBars();
+}
+
+function updateCadenaBreakdown(){
+  const filtered = getFilteredData();
+  const cadenas = CADENAS_REGIONAL.filter(c=> filtered.some(r=>r.CADENA===c) || DATA.some(r=>r.CADENA===c));
+  const tbody = document.getElementById('cadenaBreakdownBody');
+
+  const rows = cadenas.map(c=>{
+    const rows = filtered.filter(r=>r.CADENA===c);
+    const facturas = rows.length;
+    const saldoVenc = rows.reduce((a,r)=>a+Number(r.SALDO_VENC||0),0);
+    const deudaTotal = rows.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+    return {cadena:c, facturas, saldoVenc, deudaTotal};
+  }).sort((a,b)=>b.saldoVenc-a.saldoVenc);
+
+  const totalFacturas = rows.reduce((a,r)=>a+r.facturas,0);
+  const totalVenc = rows.reduce((a,r)=>a+r.saldoVenc,0);
+  const totalDeuda = rows.reduce((a,r)=>a+r.deudaTotal,0);
+
+  let html = rows.map(r=>{
+    const sel = tableOnlyCadenaFilter === r.cadena;
+    const pct = totalVenc>0 ? (r.saldoVenc/totalVenc*100).toFixed(1) : '0.0';
+    return `
+    <tr class="cadena-breakdown-row${sel?' selected':''}" data-cadena="${r.cadena}" style="cursor:pointer;">
+      <td class="row-head">${r.cadena}</td>
+      <td>${r.facturas}</td>
+      <td>${money(r.saldoVenc)}</td>
+      <td>${pct}%</td>
+      <td>${money(r.deudaTotal)}</td>
+    </tr>`;
+  }).join('');
+
+  html += `
+    <tr class="total-row">
+      <td class="row-head">TOTAL</td>
+      <td>${totalFacturas}</td>
+      <td>${money(totalVenc)}</td>
+      <td>100.0%</td>
+      <td>${money(totalDeuda)}</td>
+    </tr>`;
+
+  tbody.innerHTML = html;
+
+  tbody.querySelectorAll('.cadena-breakdown-row').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const c = tr.dataset.cadena;
+      tableOnlyCadenaFilter = (tableOnlyCadenaFilter === c) ? '' : c;
+      updateCadenaBreakdown();
+      updateComunaBreakdown(getFilteredData());
+      renderTableOnly();
+    });
+  });
+}
+
+/* ===== Modal: arbol Cadena > Comuna > Direccion ===== */
+function updateCadenaDetailBtns(){
+  const container = document.getElementById('cadenaDetailBtns');
+  const visible = (cadenaChipFilter === GRUPO_REGIONAL);
+  container.style.display = visible ? 'inline-flex' : 'none';
+}
+
+function openCadenaModal(cadena){
+  const color = CADENA_COLOR[cadena] || 'var(--ink-dim)';
+  const rows = DATA.filter(r=>r.CADENA===cadena);
+
+  document.getElementById('cadenaModalHeader').style.background = color;
+  document.getElementById('cadenaModalTitle').textContent = `Detalle ${cadena} · Comuna / Dirección`;
+  document.getElementById('cadenaModalSub').textContent =
+    `${rows.length} facturas · suma Deuda Total (SALDO_DOCU) y días de mora promedio por dirección`;
+
+  // Agrupar por comuna -> direccion, acumulando deuda y cantidad de facturas.
+  // El promedio de dias de mora SOLO considera facturas con SALDO_VENC > 0
+  // (regla general: una factura ya saldada no debe influir en el promedio de mora).
+  const porComuna = {};
+  rows.forEach(r=>{
+    const com = r.COMUNA || '\u2014';
+    const dir = r.DIRECCION || '\u2014';
+    if(!porComuna[com]) porComuna[com] = {};
+    if(!porComuna[com][dir]) porComuna[com][dir] = {deuda:0, facturas:0, diasSumVenc:0, facturasVenc:0};
+    porComuna[com][dir].deuda += Number(r.SALDO_DOCU||0);
+    porComuna[com][dir].facturas += 1;
+    if(Number(r.SALDO_VENC||0) > 0){
+      porComuna[com][dir].diasSumVenc += Number(r.DIAS_MOR||0);
+      porComuna[com][dir].facturasVenc += 1;
+    }
+  });
+
+  const comunasOrdenadas = Object.keys(porComuna)
+    .map(com=>{
+      const direcciones = Object.entries(porComuna[com])
+        .map(([dir,d])=>({
+          dir, deuda:d.deuda, facturas:d.facturas,
+          diasProm: d.facturasVenc>0 ? Math.round(d.diasSumVenc/d.facturasVenc) : 0
+        }))
+        .sort((a,b)=>b.deuda-a.deuda);
+
+      const total = direcciones.reduce((a,d)=>a+d.deuda,0);
+      const diasSumTotal = Object.values(porComuna[com]).reduce((a,d)=>a+d.diasSumVenc,0);
+      const facturasVencTotal = Object.values(porComuna[com]).reduce((a,d)=>a+d.facturasVenc,0);
+      const diasProm = facturasVencTotal>0 ? Math.round(diasSumTotal/facturasVencTotal) : 0;
+
+      return {comuna:com, direcciones, total, diasProm};
+    })
+    .sort((a,b)=>b.total-a.total);
+
+  const totalGeneral = comunasOrdenadas.reduce((a,c)=>a+c.total,0);
+
+  const body = document.getElementById('cadenaModalBody');
+  const headerRow = `
+    <div class="tree-col-headers">
+      <span>Comuna / Dirección</span>
+      <span class="col-right">
+        <span class="col-dias">Días prom.</span>
+        <span class="col-monto">Deuda Total</span>
+      </span>
+    </div>`;
+  body.innerHTML = headerRow + comunasOrdenadas.map((c,i)=>`
+    <div class="tree-comuna">
+      <div class="tree-comuna-head" data-idx="${i}">
+        <span class="name"><span class="caret">&#9656;</span>${c.comuna}</span>
+        <span class="amount-group">
+          <span class="dias-badge">&#8960; ${c.diasProm}d</span>
+          <span class="amount">${money(c.total)}</span>
+        </span>
+      </div>
+      <div class="tree-direcciones" id="treeDir${i}">
+        ${c.direcciones.map(d=>`
+          <div class="tree-direccion-row" data-cadena="${cadena}" data-comuna="${c.comuna}" data-dir="${d.dir.replace(/"/g,'&quot;')}" style="cursor:pointer;">
+            <span class="dname">${d.dir}</span>
+            <span class="amount-group">
+              <span class="dias-badge">&#8960; ${d.diasProm}d</span>
+              <span class="damount">${money(d.deuda)}</span>
+            </span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  body.querySelectorAll('.tree-comuna-head').forEach(head=>{
+    head.addEventListener('click', ()=>{
+      const idx = head.dataset.idx;
+      head.classList.toggle('open');
+      document.getElementById('treeDir'+idx).classList.toggle('open');
+    });
+  });
+
+  body.querySelectorAll('.tree-direccion-row').forEach(row=>{
+    row.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openFacturaModal(row.dataset.cadena, row.dataset.comuna, row.dataset.dir);
+    });
+  });
+
+  document.getElementById('cadenaModalTotal').innerHTML =
+    `<span>TOTAL ${cadena}</span><span>${money(totalGeneral)}</span>`;
+
+  document.getElementById('cadenaModalOverlay').classList.add('show');
+}
+
+function closeCadenaModal(){
+  document.getElementById('cadenaModalOverlay').classList.remove('show');
+}
+
+/* ===== Modal de facturas por direccion (tercer nivel, se apila sobre el de cadena) ===== */
+function openFacturaModal(cadena, comuna, direccion){
+  const color = CADENA_COLOR[cadena] || 'var(--ink-dim)';
+  const soloCadena = (comuna === undefined && direccion === undefined);
+
+  const rows = soloCadena
+    ? DATA.filter(r=> r.CADENA===cadena)
+    : DATA.filter(r=> r.CADENA===cadena && r.COMUNA===comuna && r.DIRECCION===direccion);
+
+  document.getElementById('facturaModalHeader').style.background = color;
+  document.getElementById('facturaModalTitle').textContent = soloCadena
+    ? `Facturas · ${cadena}`
+    : `Facturas · ${direccion}`;
+  document.getElementById('facturaModalSub').textContent = soloCadena
+    ? `${rows.length} factura${rows.length===1?'':'s'} en total`
+    : `${comuna} · ${cadena} · ${rows.length} factura${rows.length===1?'':'s'}`;
+
+  const ordenadas = [...rows].sort((a,b)=> Number(b.DIAS_MOR||0) - Number(a.DIAS_MOR||0));
+
+  document.getElementById('facturaModalTbody').innerHTML = ordenadas.map((r,i)=>{
+    const sev = severityInfo(r.MOROSIDAD);
+    return `
+    <tr class="factura-row-selectable" data-idx="${i}" data-dias="${r.DIAS_MOR||0}">
+      <td><input type="checkbox" class="factura-row-check" data-idx="${i}"></td>
+      <td class="row-head">${r.NUMERO}</td>
+      <td>${fechaDMA(r.EMISION)}</td>
+      <td class="dias-num ${sev.cls}" style="font-weight:700;">${r.DIAS_MOR}</td>
+      <td>${money(r.TOTAL)}</td>
+      <td>${money(r.SALDO_VENC)}</td>
+    </tr>`;
+  }).join('');
+
+  const totalVenc = rows.reduce((a,r)=>a+Number(r.SALDO_VENC||0),0);
+  const totalBruto = rows.reduce((a,r)=>a+Number(r.TOTAL||0),0);
+  document.getElementById('facturaModalTotal').innerHTML =
+    `<span>TOTAL &middot; Bruto ${money(totalBruto)}</span><span>Saldo Venc. ${money(totalVenc)}</span>`;
+
+  setupFacturaSelection();
+
+  document.getElementById('facturaModalOverlay').classList.add('show');
+}
+
+function setupFacturaSelection(){
+  const tbody = document.getElementById('facturaModalTbody');
+  const selectBar = document.getElementById('facturaModalSelectBar');
+  const countEl = document.getElementById('facturaSelectCount');
+  const avgEl = document.getElementById('facturaSelectAvg');
+  const selectAll = document.getElementById('facturaSelectAll');
+  const clearBtn = document.getElementById('facturaSelectClear');
+
+  selectAll.checked = false;
+
+  function updateSummary(){
+    const checked = tbody.querySelectorAll('.factura-row-check:checked');
+    if(checked.length === 0){
+      selectBar.style.display = 'none';
+      return;
+    }
+    selectBar.style.display = 'flex';
+    const dias = [...checked].map(c=> Number(c.closest('tr').dataset.dias||0));
+    const avg = Math.round(dias.reduce((a,d)=>a+d,0) / dias.length);
+    countEl.textContent = `${checked.length} factura${checked.length===1?'':'s'} seleccionada${checked.length===1?'':'s'}`;
+    avgEl.textContent = `⌀ ${avg} días promedio`;
+  }
+
+  tbody.querySelectorAll('.factura-row-selectable').forEach(tr=>{
+    tr.addEventListener('click', (e)=>{
+      if(e.target.type === 'checkbox') return; // el propio checkbox ya maneja su cambio
+      const cb = tr.querySelector('.factura-row-check');
+      cb.checked = !cb.checked;
+      tr.classList.toggle('selected', cb.checked);
+      updateSummary();
+    });
+  });
+
+  tbody.querySelectorAll('.factura-row-check').forEach(cb=>{
+    cb.addEventListener('change', ()=>{
+      cb.closest('tr').classList.toggle('selected', cb.checked);
+      updateSummary();
+    });
+  });
+
+  selectAll.onclick = ()=>{
+    tbody.querySelectorAll('.factura-row-check').forEach(cb=>{
+      cb.checked = selectAll.checked;
+      cb.closest('tr').classList.toggle('selected', cb.checked);
+    });
+    updateSummary();
+  };
+
+  clearBtn.onclick = ()=>{
+    tbody.querySelectorAll('.factura-row-check').forEach(cb=>{
+      cb.checked = false;
+      cb.closest('tr').classList.remove('selected');
+    });
+    selectAll.checked = false;
+    updateSummary();
+  };
+
+  updateSummary();
+}
+
+function closeFacturaModal(){
+  document.getElementById('facturaModalOverlay').classList.remove('show');
+}
+
+/* ===== Tabla de historico (siempre visible, al final del dashboard) ===== */
+const HISTORICO_COLS = [
+  {key:'CREDITO ACS', label:'Crédito ACS'},
+  {key:'TOTAL CHEQUES', label:'Total Cheques'},
+  {key:'CREDITO DE CONFIANZA', label:'Crédito de Confianza'},
+  {key:'CONTADO', label:'Contado'},
+  {key:'FUNCIONARIO HAMBURGO', label:'Funcionario Hamburgo'},
+  {key:'AÑADIR CONDICION', label:'Añadir Condición'},
+  {key:'DEU-BAGLEY', label:'Deu-Bagley'},
+  {key:'TOTAL DEUDA', label:'Total Deuda'},
+];
+const HISTORICO_SIMPLE_COLS = [
+  {key:'DEUDA AMAR', label:'Deuda Amar'},
+  {key:'DEUDA LILY', label:'Deuda Lily'},
+  {key:'DEUDA ELTIT', label:'Deuda Eltit'},
+  {key:'DEUDA SUPER 9', label:'Deuda Super 9'},
+  {key:'DIFERENCIA', label:'Diferencia'},
+];
+
+function pctBadge(v){
+  if(v === 0) return `<span style="color:var(--ink-faint);">0.0%</span>`;
+  const color = v > 0 ? 'var(--danger)' : 'var(--ok)'; // deuda que sube = malo (rojo), que baja = bueno (verde)
+  const arrow = v > 0 ? '&#9650;' : '&#9660;';
+  return `<span style="color:${color}; font-weight:600;">${arrow} ${Math.abs(v).toFixed(1)}%</span>`;
+}
+
+function buildHistoricoTable(){
+  const thead = document.getElementById('historicoThead');
+  const tbody = document.getElementById('historicoTbody');
+
+  if(!HISTORICO || HISTORICO.length === 0){
+    thead.innerHTML = '';
+    tbody.innerHTML = `<tr><td style="padding:16px; color:var(--ink-faint);">No se pudo cargar el histórico.</td></tr>`;
+    return;
+  }
+
+  let headHtml = '<tr><th class="row-head">Fecha</th><th>Índice</th>';
+  HISTORICO_COLS.forEach(c=>{
+    headHtml += `<th>${c.label}</th><th>Var.</th>`;
+  });
+  HISTORICO_SIMPLE_COLS.forEach(c=>{
+    headHtml += `<th>${c.label}</th>`;
+  });
+  headHtml += '</tr>';
+  thead.innerHTML = headHtml;
+
+  const rows = [...HISTORICO].sort((a,b)=> b.FECHA.localeCompare(a.FECHA));
+
+  tbody.innerHTML = rows.map(r=>{
+    const esCierre = r.INDICE && r.INDICE.toUpperCase().includes('CIERRE') && !r.INDICE.toUpperCase().includes('NO CIERRE');
+    let rowHtml = `<tr${esCierre ? ' style="background:#fff8dc;"' : ''}>`;
+    rowHtml += `<td class="row-head">${fechaDMA(r.FECHA)}</td>`;
+    rowHtml += `<td>${esCierre ? '<b>CIERRE</b>' : (r.INDICE||'').trim()}</td>`;
+    HISTORICO_COLS.forEach(c=>{
+      rowHtml += `<td>${money(r[c.key]||0)}</td><td>${pctBadge(r['VAR_'+c.key]||0)}</td>`;
+    });
+    HISTORICO_SIMPLE_COLS.forEach(c=>{
+      let valor = r[c.key];
+      // La hoja publicada puede demorar en incorporar una columna nueva.
+      // Solo para la fecha más reciente se usa la deuda real de facturas como respaldo.
+      if(c.key==='DEUDA SUPER 9' && (valor===undefined || valor==='') && r===rows[0]){
+        const desdeFacturas = DATA.filter(f=>String(f.CADENA||'').trim().toUpperCase()==='SUPER 9')
+          .reduce((a,f)=>a+Number(f.SALDO_DOCU||0),0);
+        if(desdeFacturas>0) valor=desdeFacturas;
+      }
+      rowHtml += `<td>${valor === undefined || valor === '' ? '&mdash;' : money(valor)}</td>`;
+    });
+    rowHtml += '</tr>';
+    return rowHtml;
+  }).join('');
+}
+
+function buildAvancePagoTable(){
+  const panel = document.getElementById('avancePagoPanel');
+  const isChipRegional = (cadenaChipFilter === GRUPO_REGIONAL || CADENAS_REGIONAL.includes(cadenaChipFilter));
+
+  if(!isChipRegional){
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+
+  const thead = document.getElementById('avancePagoThead');
+  const tbody = document.getElementById('avancePagoTbody');
+  const sub = document.getElementById('avancePagoSub');
+
+  if(!HISTORICO || HISTORICO.length === 0){
+    thead.innerHTML = '';
+    tbody.innerHTML = `<tr><td style="padding:16px; color:var(--ink-faint);">No se pudo cargar el histórico.</td></tr>`;
+    return;
+  }
+
+  // Cierre ancla: la fila mas antigua marcada como CIERRE (por defecto, cierre de abril)
+  const cierres = HISTORICO.filter(r => r.INDICE && r.INDICE.toUpperCase().includes('CIERRE') && !r.INDICE.toUpperCase().includes('NO CIERRE'));
+  const cierreAncla = [...cierres].sort((a,b)=> a.FECHA.localeCompare(b.FECHA))[0];
+
+  // Deuda actual: la fila mas reciente del historico (cualquier indice)
+  const masReciente = [...HISTORICO].sort((a,b)=> b.FECHA.localeCompare(a.FECHA))[0];
+
+  if(!cierreAncla || !masReciente){
+    tbody.innerHTML = `<tr><td style="padding:16px; color:var(--ink-faint);">No hay suficientes datos en el histórico.</td></tr>`;
+    return;
+  }
+
+  sub.textContent = `Cierre ancla: ${fechaDMA(cierreAncla.FECHA)} · Deuda actual: ${fechaDMA(masReciente.FECHA)}`;
+
+  thead.innerHTML = `<tr>
+    <th class="row-head">Cadena</th>
+    <th>Cierre ${fechaDMA(cierreAncla.FECHA)}</th>
+    <th>% del Total</th>
+    <th>Deuda al ${fechaDMA(masReciente.FECHA)}</th>
+    <th>% del Total</th>
+    <th>Pagado</th>
+    <th>Días Prom.</th>
+  </tr>`;
+
+  const cadenasMap = [
+    {label:'AMAR', dataKey:'DEUDA AMAR', cadena:'TREBOL'},
+    {label:'LILY', dataKey:'DEUDA LILY', cadena:'LILY'},
+    {label:'ELTIT', dataKey:'DEUDA ELTIT', cadena:'ELTIT'},
+    {label:'SUPER 9', dataKey:'DEUDA SUPER 9', cadena:'SUPER 9'},
+  ];
+
+  // SUPER 9: usar el histórico solo si existe su columna en Google Sheets.
+  // Si no existe, mostrar deuda actual de la hoja principal sin inventar un cierre antiguo.
+  const currentSuper9 = DATA.filter(r=>String(r.CADENA||'').trim().toUpperCase()==='SUPER 9')
+    .reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  const hasSuper9History = Object.prototype.hasOwnProperty.call(cierreAncla,'DEUDA SUPER 9')
+    && Object.prototype.hasOwnProperty.call(masReciente,'DEUDA SUPER 9')
+    && cierreAncla['DEUDA SUPER 9'] !== '' && masReciente['DEUDA SUPER 9'] !== '';
+  const getCierre = c => c.cadena==='SUPER 9' && !hasSuper9History ? null : Number(cierreAncla[c.dataKey]||0);
+  const getActual = c => c.cadena==='SUPER 9' && !hasSuper9History ? currentSuper9 : Number(masReciente[c.dataKey]||0);
+  const cierreTotal = cadenasMap.reduce((a,c)=> a + (getCierre(c)||0), 0);
+  const deudaTotalPct = cadenasMap.reduce((a,c)=> a + getActual(c), 0);
+
+  if(!hasSuper9History){
+    sub.textContent += ' · SUPER 9: deuda actual de facturas; cierre histórico no disponible. Total pagado excluye SUPER 9';
+  }
+
+  const rows = cadenasMap.map(c=>{
+    const cierreVal = getCierre(c);
+    const deudaVal = getActual(c);
+    const pagado = cierreVal===null ? null : cierreVal-deudaVal;
+    const pct = cierreVal===null ? null : (cierreTotal>0 ? cierreVal/cierreTotal*100 : 0);
+    const pctDeuda = deudaTotalPct>0 ? deudaVal/deudaTotalPct*100 : 0;
+
+    const facturasVenc = DATA.filter(r=>r.CADENA===c.cadena && Number(r.SALDO_VENC||0)>0);
+    const diasProm = facturasVenc.length>0
+      ? Math.round(facturasVenc.reduce((a,r)=>a+Number(r.DIAS_MOR||0),0) / facturasVenc.length)
+      : 0;
+
+    return {label:c.label, cadena:c.cadena, cierreVal, pct, deudaVal, pctDeuda, pagado, diasProm};
+  });
+
+  const totalCierre = rows.reduce((a,r)=>a+(r.cierreVal||0),0);
+  const totalDeuda = rows.reduce((a,r)=>a+r.deudaVal,0);
+  const totalPagado = rows.reduce((a,r)=>a+(r.pagado||0),0);
+  const facturasVencTodas = DATA.filter(r=> CADENAS_REGIONAL.includes(r.CADENA) && Number(r.SALDO_VENC||0)>0);
+  const diasPromTotal = facturasVencTodas.length>0
+    ? Math.round(facturasVencTodas.reduce((a,r)=>a+Number(r.DIAS_MOR||0),0) / facturasVencTodas.length)
+    : 0;
+
+  tbody.innerHTML = rows.map(r=>`
+    <tr class="cadena-breakdown-row" data-cadena="${r.cadena}" style="cursor:pointer;">
+      <td class="row-head">${r.label}</td>
+      <td>${r.cierreVal===null ? "&mdash;" : money(r.cierreVal)}</td>
+      <td>${r.pct===null ? "&mdash;" : r.pct.toFixed(0)+"%"}</td>
+      <td>${money(r.deudaVal)}</td>
+      <td>${r.pctDeuda.toFixed(0)}%</td>
+      <td style="color:${r.pagado===null ? 'var(--ink-faint)' : (r.pagado>=0 ? 'var(--ok)' : 'var(--danger)')}; font-weight:600;">${r.pagado===null ? "&mdash;" : money(r.pagado)}</td>
+      <td>${r.diasProm}</td>
+    </tr>
+  `).join('') + `
+    <tr class="total-row">
+      <td class="row-head">TOTAL</td>
+      <td>${money(totalCierre)}</td>
+      <td>100%</td>
+      <td>${money(totalDeuda)}</td>
+      <td>100%</td>
+      <td style="color:${totalPagado>=0 ? 'var(--ok)' : 'var(--danger)'};">${money(totalPagado)}</td>
+      <td>${diasPromTotal}</td>
+    </tr>
+  `;
+
+  tbody.querySelectorAll('.cadena-breakdown-row').forEach(tr=>{
+    tr.addEventListener('click', ()=> openFacturaModal(tr.dataset.cadena));
+  });
+}
+
+
+function updateComunaBreakdown(filtered){
+  const panel = document.getElementById('comunaBreakdownPanel');
+  const isCreditoACS = activeFilters.CONDICION2 && activeFilters.CONDICION2.has('CREDITO ACS') && activeFilters.CONDICION2.size===1;
+  const isChipRegional = (cadenaChipFilter === GRUPO_REGIONAL || CADENAS_REGIONAL.includes(cadenaChipFilter));
+
+  if(!isCreditoACS && !isChipRegional){
+    panel.style.display = 'none';
+    return;
+  }
+  panel.style.display = 'block';
+
+  // 'filtered' ya viene de getFilteredData(), que aplica el chip de cadena cuando corresponde.
+  let base = filtered;
+  if(tableOnlyCadenaFilter){
+    base = base.filter(r=> r.CADENA === tableOnlyCadenaFilter);
+  }
+
+  const badge = document.getElementById('comunaCadenaBadge');
+  if(tableOnlyCadenaFilter){
+    const color = CADENA_COLOR[tableOnlyCadenaFilter] || 'var(--ink-dim)';
+    badge.innerHTML = `<span class="cadena-badge" style="background:${color};"><span class="dot"></span>${tableOnlyCadenaFilter}</span>`;
+    badge.style.display = 'inline-flex';
+    document.getElementById('comunaBreakdownSub').textContent =
+      'Click en una porción del gráfico o en la tabla de cadena para cambiar el filtro';
+  } else {
+    badge.style.display = 'none';
+    badge.innerHTML = '';
+    document.getElementById('comunaBreakdownSub').textContent =
+      'Solo visible con el filtro CREDITO ACS activo o el chip de cadena regional · suma SALDO_VENC / SALDO_DOCU';
+  }
+
+  const comunas = [...new Set(base.map(r=>r.COMUNA).filter(Boolean))];
+  const tbody = document.getElementById('comunaBreakdownBody');
+
+  const rows = comunas.map(c=>{
+    const rowsC = base.filter(r=>r.COMUNA===c);
+    const facturas = rowsC.length;
+    const saldoVenc = rowsC.reduce((a,r)=>a+Number(r.SALDO_VENC||0),0);
+    const deudaTotal = rowsC.reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+    return {comuna:c, facturas, saldoVenc, deudaTotal};
+  }).sort((a,b)=>b.deudaTotal-a.deudaTotal);
+
+  const totalFacturas = rows.reduce((a,r)=>a+r.facturas,0);
+  const totalVenc = rows.reduce((a,r)=>a+r.saldoVenc,0);
+  const totalDeuda = rows.reduce((a,r)=>a+r.deudaTotal,0);
+
+  let html = rows.map(r=>{
+    const pct = totalVenc>0 ? (r.saldoVenc/totalVenc*100).toFixed(1) : '0.0';
+    const sel = tableOnlyComunaFilter === r.comuna;
+    return `
+    <tr class="cadena-breakdown-row${sel?' selected':''}" data-comuna="${r.comuna}" style="cursor:pointer;">
+      <td class="row-head">${r.comuna}</td>
+      <td>${r.facturas}</td>
+      <td>${money(r.saldoVenc)}</td>
+      <td>${pct}%</td>
+      <td>${money(r.deudaTotal)}</td>
+    </tr>`;
+  }).join('');
+
+  html += `
+    <tr class="total-row">
+      <td class="row-head">TOTAL</td>
+      <td>${totalFacturas}</td>
+      <td>${money(totalVenc)}</td>
+      <td>100.0%</td>
+      <td>${money(totalDeuda)}</td>
+    </tr>`;
+
+  tbody.innerHTML = html;
+
+  tbody.querySelectorAll('.cadena-breakdown-row').forEach(tr=>{
+    tr.addEventListener('click', ()=>{
+      const c = tr.dataset.comuna;
+      tableOnlyComunaFilter = (tableOnlyComunaFilter === c) ? '' : c;
+      updateComunaBreakdown(getFilteredData());
+      renderTableOnly();
+    });
+  });
+}
+
+
+function updateVendedorBars(){
+  const filtered = getFilteredData();
+  const map = groupSumBy(filtered, r=>r.VENDEDOR, 'SALDO_VENC');
+  const entries = Object.entries(map).sort((a,b)=>b[1]-a[1]).slice(0,12);
+  const container = document.getElementById('vendedorBars');
+
+  if(entries.length===0){
+    container.innerHTML = '<div style="padding:20px; color:var(--ink-faint); font-size:12.5px;">Sin datos para el filtro actual.</div>';
+    return;
+  }
+  const max = entries[0][1];
+
+  container.innerHTML = entries.map(([name,val])=>{
+    let cls = 'barrow';
+    if(tableOnlyVendedorFilter){ cls += tableOnlyVendedorFilter===name ? ' selected' : ' dimmed'; }
+    return `
+      <div class="${cls}" data-vendedor="${name}">
+        <div class="name">${name}</div>
+        <div class="track"><div class="fill" style="width:${(val/max*100).toFixed(1)}%"></div></div>
+        <div class="val">${money(val)}</div>
+      </div>
+    `;
+  }).join('');
+
+  container.querySelectorAll('.barrow').forEach(row=>{
+    row.addEventListener('click', ()=>{
+      const v = row.dataset.vendedor;
+      tableOnlyVendedorFilter = (tableOnlyVendedorFilter === v) ? '' : v;
+      updateVendedorBars();
+      renderTableOnly();
+    });
+  });
+}
+
+/* ===== Matrix table: Morosidad x Condicion de pago ===== */
+const MOROSIDAD_ORDER = ['FACTURA EN RUTA','MOROSIDAD ENTRE 0 A 5 DIAS','MOROSIDAD SUPERIOR A 5 DIAS'];
+const MOROSIDAD_SHORT = {'FACTURA EN RUTA':'FACTURA EN RUTA','MOROSIDAD ENTRE 0 A 5 DIAS':'ENTRE 0 A 5 DIAS','MOROSIDAD SUPERIOR A 5 DIAS':'SUPERIOR A 5 DIAS'};
+
+function buildMatrixTable(){
+  // static skeleton is rebuilt fully in updateMatrixTable since columns depend on data
+}
+
+function updateMatrixTable(){
+  // Use data filtered by everything EXCEPT morosidad/condicion, so the matrix always shows
+  // the full grid of combinations available under other active filters (cadena, vendedor).
+  const scoped = DATA.filter(r=>{
+    if(cadenaChipFilter){
+      if(cadenaChipFilter === GRUPO_REGIONAL){ if(!CADENAS_REGIONAL.includes(r.CADENA)) return false; }
+      else if(r.CADENA !== cadenaChipFilter) return false;
+    }
+    if(activeFilters.VENDEDOR && !activeFilters.VENDEDOR.has(r.VENDEDOR)) return false;
+    return true;
+  });
+
+  const condiciones = [...new Set(scoped.map(r=>r.CONDICION2))]
+    .sort((a,b)=> (colTotal(scoped,b) - colTotal(scoped,a)));
+
+  function colTotal(data, cond){
+    return data.filter(r=>r.CONDICION2===cond).reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+  }
+
+  const morosidades = MOROSIDAD_ORDER.filter(m=> scoped.some(r=>r.MOROSIDAD===m));
+
+  // Build cell value map
+  const cellVal = {};
+  morosidades.forEach(m=>{
+    condiciones.forEach(c=>{
+      cellVal[m+'|'+c] = scoped.filter(r=>r.MOROSIDAD===m && r.CONDICION2===c)
+                                .reduce((a,r)=>a+Number(r.SALDO_DOCU||0),0);
+    });
+  });
+
+  const selM = activeFilters.MOROSIDAD;
+  const selC = activeFilters.CONDICION2;
+  const hasSel = selM && selC && selM.size===1 && selC.size===1;
+
+  let html = '<thead><tr><th class="row-head corner">Morosidad \\ Condición</th>';
+  condiciones.forEach(c=> html += `<th>${c}</th>`);
+  html += '<th class="total-col">TOTAL</th></tr></thead><tbody>';
+
+  morosidades.forEach(m=>{
+    html += `<tr><td class="row-head">${MOROSIDAD_SHORT[m]||m}</td>`;
+    let rowTotal = 0;
+    condiciones.forEach(c=>{
+      const v = cellVal[m+'|'+c]||0;
+      rowTotal += v;
+      let cls = 'cell';
+      if(v===0) cls += ' zero';
+      if(hasSel){ cls += ([...selM][0]===m && [...selC][0]===c) ? ' selected' : ' dimmed'; }
+      html += `<td class="${cls}" data-morosidad="${m}" data-condicion="${c}">${v>0?money(v):'—'}</td>`;
+    });
+    html += `<td class="total-col cell" data-morosidad="${m}" data-condicion="">${money(rowTotal)}</td></tr>`;
+  });
+
+  html += '<tr class="total-row"><td class="row-head">TOTAL</td>';
+  let grandTotal = 0;
+  condiciones.forEach(c=>{
+    const colSum = morosidades.reduce((a,m)=>a+(cellVal[m+'|'+c]||0),0);
+    grandTotal += colSum;
+    html += `<td class="cell" data-morosidad="" data-condicion="${c}">${money(colSum)}</td>`;
+  });
+  html += `<td class="total-col">${money(grandTotal)}</td></tr>`;
+  html += '</tbody>';
+
+  const table = document.getElementById('matrixTable');
+  table.innerHTML = html;
+
+  table.querySelectorAll('td.cell[data-morosidad][data-condicion]').forEach(td=>{
+    const m = td.dataset.morosidad, c = td.dataset.condicion;
+    if(m && c){
+      td.addEventListener('click', ()=> toggleMatrixCell(m, c));
+    } else if(m && !c){
+      td.addEventListener('click', ()=> toggleFilter('MOROSIDAD', m));
+    } else if(c && !m){
+      td.addEventListener('click', ()=> toggleFilter('CONDICION2', c));
+    }
+  });
+}
+
+
+/* ===== Table ===== */
+function morosidadTag(m){
+  if(m === 'MOROSIDAD SUPERIOR A 5 DIAS') return `<span class="tag danger">&gt;5 días</span>`;
+  if(m === 'MOROSIDAD ENTRE 0 A 5 DIAS') return `<span class="tag warn">0-5 días</span>`;
+  if(m === 'FACTURA EN RUTA') return `<span class="tag ok">en ruta</span>`;
+  return m||'';
+}
+
+function renderTableOnly(){
+  renderTable(getFilteredData());
+}
+
+function severityInfo(m){
+  if(m === 'MOROSIDAD SUPERIOR A 5 DIAS') return {color:'var(--danger)', cls:'sev-danger'};
+  if(m === 'MOROSIDAD ENTRE 0 A 5 DIAS') return {color:'var(--warn)', cls:'sev-warn'};
+  if(m === 'FACTURA EN RUTA') return {color:'var(--ok)', cls:'sev-ok'};
+  return {color:'transparent', cls:''};
+}
+
+function renderTable(baseRows){
+  updateDetailActiveFilters();
+  const q = document.getElementById('searchBox').value.toLowerCase();
+  let rows = baseRows;
+  if(tableOnlyCadenaFilter){
+    rows = rows.filter(r=> r.CADENA === tableOnlyCadenaFilter);
+  }
+  if(tableOnlyVendedorFilter){
+    rows = rows.filter(r=> r.VENDEDOR === tableOnlyVendedorFilter);
+  }
+  if(tableOnlyComunaFilter){
+    rows = rows.filter(r=> r.COMUNA === tableOnlyComunaFilter);
+  }
+  if(tableOnlyClienteFilter){
+    rows = rows.filter(r=> (r.CLIENTE || r.NOMBRE_ENT || r.ENTIDAD || '') === tableOnlyClienteFilter);
+  }
+  if(q){
+    rows = rows.filter(r=>{
+      const hay = [r.CLIENTE, r.NOMBRE_ENT, r.ENTIDAD, r.NUMERO, r.CONDICION, r.CONDICION2].filter(Boolean).join(' ').toLowerCase();
+      return hay.includes(q);
+    });
+  }
+
+  rows = [...rows].sort((a,b)=>{
+    let va=a[sortState.key], vb=b[sortState.key];
+    if(typeof va==='string'){ va=va.toLowerCase(); vb=(vb||'').toLowerCase(); }
+    if(va<vb) return sortState.dir==='asc'?-1:1;
+    if(va>vb) return sortState.dir==='asc'?1:-1;
+    return 0;
+  });
+
+  const cap = rows.slice(0,200);
+  const tbody = document.getElementById('tableBody');
+  tbody.innerHTML = cap.map(r=>{
+    const sev = severityInfo(r.MOROSIDAD);
+    const cliente = r.CLIENTE || r.NOMBRE_ENT || r.ENTIDAD || '—';
+    const clientActive = tableOnlyClienteFilter && cliente === tableOnlyClienteFilter;
+    return `
+    <tr>
+      <td class="severity-bar"><span style="background:${sev.color};"></span></td>
+      <td class="entity-cell"><span class="client-link${clientActive?' active':''}" data-cliente="${escapeHTML(cliente)}" title="Ver todas las facturas de este cliente">${escapeHTML(cliente)}</span></td>
+      <td>${escapeHTML(r.COMUNA || '—')}</td>
+      <td>${escapeHTML(r.VENDEDOR || '—')}</td>
+      <td class="num">${escapeHTML(r.NUMERO ?? '—')}</td>
+      <td>${r.EMISION ? fechaDMA(r.EMISION) : '—'}</td>
+      <td>${r.PRI_VENCIM ? fechaDMA(r.PRI_VENCIM) : '—'}</td>
+      <td class="num dias-num ${sev.cls}">${r.DIAS_MOR ?? '—'}</td>
+      <td class="num">${money(r.TOTAL)}</td>
+      <td class="num">${money(r.SALDO_VENC)}</td>
+      <td>${morosidadTag(r.MOROSIDAD)}</td>
+      <td>${escapeHTML(r.CONDICION || '—')}</td>
+      <td>${escapeHTML(r.CADENA || '—')}</td>
+    </tr>`;
+  }).join('');
+
+  tbody.querySelectorAll('.client-link').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const cliente = el.dataset.cliente || '';
+      tableOnlyClienteFilter = (tableOnlyClienteFilter === cliente) ? '' : cliente;
+      renderAll();
+    });
+  });
+
+  document.getElementById('rowCount').textContent =
+    `Mostrando ${cap.length} de ${rows.length} filas (${DATA.length} total)`;
+}
+</script>
+</body>
+</html>
