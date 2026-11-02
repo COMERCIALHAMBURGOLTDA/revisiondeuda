@@ -588,6 +588,16 @@
     .cheque-kpi-grid{grid-template-columns:1fr;}
     .cheque-action-tile{min-height:72px;}
   }
+  /* Gráfico histórico de evolución */
+  .historico-chart-controls{display:flex; flex-direction:column; gap:10px; margin:12px 0 14px; align-items:stretch;}
+  .historico-chart-group{display:flex; align-items:flex-start; gap:12px; flex-wrap:wrap; padding:10px 12px; border:1px solid var(--border); border-radius:4px; background:#faf9f8;}
+  .historico-chart-group-title{font-size:11px; font-weight:700; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.04em; min-width:72px; padding-top:2px;}
+  .historico-chart-group-options{display:flex; flex-wrap:wrap; gap:8px 14px; align-items:center; flex:1;}
+  .historico-chart-controls label{font-size:12px; color:var(--ink); display:inline-flex; align-items:center; gap:5px; cursor:pointer; white-space:nowrap;}
+  .historico-chart-controls input{accent-color:#1f6e8c;}
+  .historico-chart-shell{height:340px; position:relative; width:100%;}
+  .historico-chart-note{font-size:11px; color:var(--ink-faint); margin-top:9px;}
+  @media(max-width:640px){.historico-chart-shell{height:270px;}}
 </style>
 </head>
 <body>
@@ -743,6 +753,14 @@
       </div>
     </div>
 
+    <div class="card table-card" id="historicoGraficoPanel">
+      <div class="card-title">Evolución histórica de la deuda</div>
+      <div class="card-sub">Comportamiento por fecha · Incluye cierres y registros intermedios</div>
+      <div class="historico-chart-controls" id="historicoChartControls" aria-label="Seleccionar series del gráfico"></div>
+      <div class="historico-chart-shell"><canvas id="chartHistorico" aria-label="Gráfico de líneas del histórico de deuda" role="img"></canvas></div>
+      <div class="historico-chart-note">Valores en pesos chilenos · Pasa el cursor sobre cada punto para consultar el monto y el tipo de registro.</div>
+    </div>
+
     <div class="card table-card">
       <div class="card-title">Detalle de facturas</div>
       <div class="card-sub">Respeta todos los filtros activos. Busca por cliente, entidad o número · click en un cliente para ver todas sus facturas.</div>
@@ -779,6 +797,7 @@
         </table>
       </div>
     </div>
+
 
     <div class="card table-card">
       <div class="card-title">Histórico de cierres</div>
@@ -1106,7 +1125,25 @@ function fechaDMA(iso){
   return `${d}-${m}-${y}`;
 }
 function moneyShort(n){
-  return '$' + (n/1e6).toFixed(1) + 'M';
+  const num = Number(n)||0;
+  const abs = Math.abs(num);
+  if(abs >= 1e9){
+    const val = num/1e9;
+    return '$' + (Number.isInteger(Math.round(val*10)/10) && Math.abs(val - Math.round(val)) < 0.05 ? Math.round(val) : (Math.round(val*10)/10).toLocaleString('es-CL',{minimumFractionDigits:(Math.abs(val - Math.round(val)) < 0.05 ? 0 : 1), maximumFractionDigits:1})) + 'B';
+  }
+  if(abs >= 1e6){
+    const val = num/1e6;
+    const rounded1 = Math.round(val*10)/10;
+    const isWhole = Math.abs(rounded1 - Math.round(rounded1)) < 0.05;
+    return '$' + rounded1.toLocaleString('es-CL',{minimumFractionDigits:isWhole?0:1, maximumFractionDigits:isWhole?0:1}) + 'M';
+  }
+  if(abs >= 1e3){
+    const val = num/1e3;
+    const rounded1 = Math.round(val*10)/10;
+    const isWhole = Math.abs(rounded1 - Math.round(rounded1)) < 0.05;
+    return '$' + rounded1.toLocaleString('es-CL',{minimumFractionDigits:isWhole?0:1, maximumFractionDigits:isWhole?0:1}) + 'K';
+  }
+  return '$' + Math.round(num).toLocaleString('es-CL');
 }
 
 function init(){
@@ -1115,6 +1152,7 @@ function init(){
   buildVendedorBars();
   buildMatrixTable();
   buildHistoricoTable();
+  buildHistoricoChart();
   renderChequeSummary();
   renderAll();
 
@@ -2038,6 +2076,157 @@ const HISTORICO_SIMPLE_COLS = [
   {key:'DEUDA SUPER 9', label:'Deuda Super 9'},
   {key:'DIFERENCIA', label:'Diferencia'},
 ];
+
+/* Serie de líneas basada en la MISMA matriz HISTORICO que alimenta la tabla. */
+const HISTORICO_CHART_GROUPS = [
+  {
+    title:'Totales',
+    items:[
+      {key:'TOTAL DEUDA', label:'Total Deuda'},
+      {key:'TOTAL CHEQUES', label:'Total Cheques'}
+    ]
+  },
+  {
+    title:'ACS',
+    items:[
+      {key:'CREDITO ACS', label:'Crédito ACS'},
+      {key:'DEUDA AMAR', label:'Deuda Amar'},
+      {key:'DEUDA LILY', label:'Deuda Lily'},
+      {key:'DEUDA ELTIT', label:'Deuda Eltit'},
+      {key:'DEUDA SUPER 9', label:'Deuda Super 9'}
+    ]
+  },
+  {
+    title:'Resto',
+    items:[
+      {key:'CREDITO DE CONFIANZA', label:'Crédito de Confianza'},
+      {key:'CONTADO', label:'Contado'},
+      {key:'FUNCIONARIO HAMBURGO', label:'Funcionario Hamburgo'},
+      {key:'AÑADIR CONDICION', label:'Añadir Condición'},
+      {key:'DEU-BAGLEY', label:'Deu-Bagley'}
+    ]
+  }
+];
+const HISTORICO_CHART_SERIES = HISTORICO_CHART_GROUPS
+  .flatMap(g=>g.items)
+  .map((c,i)=>({
+    ...c,
+    color:['#165c36','#e49a29','#195b83','#a57c37','#7c5cbf','#e27538','#527e9d','#27956b','#a677c8','#d05d65','#3b8e9e','#757575'][i%12]
+  }));
+const historicoChartSelected = new Set(['TOTAL DEUDA','CREDITO ACS','TOTAL CHEQUES']);
+function buildHistoricoChart(){
+  const controls=document.getElementById('historicoChartControls');
+  const canvas=document.getElementById('chartHistorico');
+  if(!canvas || !controls) return;
+  if(!HISTORICO.length){
+    controls.textContent='No hay registros históricos disponibles para graficar.';
+    return;
+  }
+  controls.replaceChildren();
+  HISTORICO_CHART_GROUPS.forEach(group=>{
+    const wrap=document.createElement('div');
+    wrap.className='historico-chart-group';
+
+    const title=document.createElement('div');
+    title.className='historico-chart-group-title';
+    title.textContent=group.title;
+
+    const options=document.createElement('div');
+    options.className='historico-chart-group-options';
+
+    group.items.forEach(serieBase=>{
+      const serie=HISTORICO_CHART_SERIES.find(s=>s.key===serieBase.key);
+      if(!serie) return;
+      const label=document.createElement('label');
+      const input=document.createElement('input');
+      input.type='checkbox';
+      input.checked=historicoChartSelected.has(serie.key);
+      input.addEventListener('change',()=>{
+        if(input.checked) historicoChartSelected.add(serie.key);
+        else historicoChartSelected.delete(serie.key);
+        renderHistoricoChart();
+      });
+      const text=document.createElement('span');
+      text.textContent=serie.label;
+      label.append(input,text);
+      options.appendChild(label);
+    });
+
+    wrap.append(title,options);
+    controls.appendChild(wrap);
+  });
+  renderHistoricoChart();
+}
+function renderHistoricoChart(){
+  const canvas=document.getElementById('chartHistorico');
+  if(!canvas || !HISTORICO.length) return;
+  const rows=HISTORICO.filter(r=>/^\d{4}-\d{2}-\d{2}$/.test(r.FECHA||''))
+    .sort((a,b)=>a.FECHA.localeCompare(b.FECHA));
+  const series=HISTORICO_CHART_SERIES.filter(c=>historicoChartSelected.has(c.key));
+  // Super 9 no tiene histórico previo: mostrar únicamente los valores reales disponibles.
+  // Si el último registro todavía no trae la columna, usar el mismo respaldo
+  // de facturas que ya utiliza la tabla de Histórico de cierres.
+  const ultimo=rows[rows.length-1];
+  const super9Actual=DATA.filter(f=>String(f.CADENA||'').trim().toUpperCase()==='SUPER 9')
+    .reduce((sum,f)=>sum+Number(f.SALDO_DOCU||0),0);
+  const getChartValue=(r,key)=>{
+    const valor=r[key];
+    if(key==='DEUDA SUPER 9'){
+      if(valor!==undefined && valor!==null && valor!=='' && Number.isFinite(Number(valor)))
+        return Number(valor);
+      return r===ultimo && super9Actual>0 ? super9Actual : null;
+    }
+    return Number(valor)||0;
+  };
+  const datasets=series.map(c=>({
+    label:c.label,
+    data:rows.map(r=>getChartValue(r,c.key)),
+    borderColor:c.color,
+    backgroundColor:c.color,
+    borderWidth:c.key==='TOTAL DEUDA'?3:2,
+    tension:0.22,
+    pointRadius:rows.length>60?1:3,
+    pointHoverRadius:6,
+    pointBackgroundColor:c.color,
+    pointBorderColor:'#ffffff',
+    pointBorderWidth:1.5,
+    fill:false,
+    spanGaps:false
+  }));
+  if(chartInstances.historico)chartInstances.historico.destroy();
+  chartInstances.historico=new Chart(canvas,{
+    type:'line',
+    data:{labels:rows.map(r=>fechaDMA(r.FECHA)),datasets},
+    options:{
+      responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      layout:{padding:{top:20}},
+      scales:{
+        x:{ticks:{maxTicksLimit:12,maxRotation:45},grid:{display:false}},
+        y:{beginAtZero:true,ticks:{callback:v=>moneyShort(v)}}
+      },
+      plugins:{
+        legend:{display:false},
+        datalabels:{
+          display:ctx=>ctx.dataset.data.length <= 24 && ctx.dataset.data[ctx.dataIndex] !== null,
+          formatter:value=>value===null ? '' : moneyShort(value),
+          anchor:'end',
+          align:'top',
+          offset:4,
+          clamp:true,
+          clip:false,
+          color:ctx=>ctx.dataset.borderColor,
+          font:{size:10, weight:'700'},
+          textStrokeColor:'rgba(255,255,255,0.85)',
+          textStrokeWidth:3
+        },
+        tooltip:{callbacks:{
+          title:items=>{const r=rows[items[0]?.dataIndex];return r?fechaDMA(r.FECHA)+' · '+(r.INDICE||'') : '';},
+          label:ctx=>ctx.dataset.label+': $'+Math.round(ctx.parsed.y).toLocaleString('es-CL')
+        }}
+      }
+    }
+  });
+}
 
 function pctBadge(v){
   if(v === 0) return `<span style="color:var(--ink-faint);">0.0%</span>`;
